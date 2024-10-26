@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team / Year</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <!-- Link to Google Fonts for global font styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to global stylesheet -->
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+<div class="login-container">
+    <h1 style="font-size: 48px;">Enter Team and Year</h1>
+
+      <!-- Form for checking team and year roster -->
+    <form action="{{ url_for('main.generate_roster') }}" method="GET" class="button-container">
+
+        <!-- Dropdown for Team Name -->
+        <label for="team" style="font-size: 1.5rem; margin-top: 20px">Select Team</label>
+        <select id="team" name="team">
+            <option value="tigers">Detroit Tigers</option>
+            <option value="yankees">New York Yankees</option>
+            <option value="dodgers">Los Angeles Dodgers</option>
+
+        </select>
+
+        <!-- Dropdown for Year -->
+        <label for="year" style="font-size: 1.5rem; margin-top: 40px">Select Year</label>
+        <select id="year" name="year">
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+
+        </select>
+
+        <!-- Submit button -->
+        <input type="submit" style="margin-top: 80px" value="Generate Roster">
+    </form>
+
+</div>
+
+</body>
+</html>
