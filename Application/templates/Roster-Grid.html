@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roster / Grid</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <!-- Link to Google Fonts for global font styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to global stylesheet -->
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+<div class="login-container">
+    <h1 style="font-size: 48px;">Game On – Your Move!</h1>
+
+    <!-- Image under the heading -->
+    <img src="{{ url_for('static', filename='Images/icons8-tiger-100.png') }}" alt="Tiger Icon"
+         style="display: block; margin: 20px auto;
+         width: 100px; height: 100px;">
+
+    <!-- Form for checking team and year roster -->
+    <form action="{{ url_for('main.team_year') }}" method="GET" class="button-container"
+          style="margin-top: 20px">
+        <input type="submit" value="Generate a Baseball Team Roster">
+    </form>
+
+    <!-- Form for playing the Immaculate Grid -->
+    <form action="{{ url_for('main.play_grid') }}" method="GET" class="button-container"
+    style="margin-top: 10px">
+        <input type="submit" value="Play Immaculate Grid">
+    </form>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Account</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+
+<body>
+<div class="login-container">
+    <h1>Register Account</h1>
+    <form action="/register" method="POST">
+        <label for="first-name">First Name</label>
+        <input type="text" id="first-name" name="first_name" required>
+
+        <label for="last-name">Last Name</label>
+        <input type="text" id="last-name" name="last_name" required>
+
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="confirm-password">Confirm Password</label>
+        <input type="password" id="confirm-password" name="confirm_password" required>
+
+        <input type="submit" value="Register">
+
+        <!-- Cancel button -->
+        <button type="button" class="btn"
+                style="background-color: darkred; color: white;"
+                onmouseover="this.style.backgroundColor='red'"
+                onmouseout="this.style.backgroundColor='darkred'"
+                onclick="window.location.href='{{ url_for('main.home') }}'"
+        >Cancel</button>
+    </form>
+</div>r
+
+</html>

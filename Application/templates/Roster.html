@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roster</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <!-- Link to Google Fonts for global font styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to global stylesheet -->
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1 style="font-size: 48px;">Team Roster</h1>
+
+        <h1 style="margin-top: 150px">[Display Roster Here]</h1>
+
+        <!-- Try Again button redirects to the same page -->
+        <form action="{{ url_for('main.team_year') }}" style="margin-top: 200px" method="GET">
+            <input type="submit" style="margin-top: 20px" value="Generate New Roster">
+        </form>
+
+        <!-- Home button redirects to the homepage -->
+        <form action="{{ url_for('main.home') }}" method="GET">
+            <input type="submit" style="margin-top: 20px" value="Home">
+        </form>
+
+    </div>
+</body>
+
+</html>
