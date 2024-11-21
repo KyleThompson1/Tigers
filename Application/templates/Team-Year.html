@@ -9,36 +9,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Link to global stylesheet -->
     <link rel="stylesheet" href="../static/style.css">
+    <script>
+    function updateYearDropdown() {
+        const teamSelect = document.getElementById('team_name');
+        const yearSelect = document.getElementById('yearID');
+
+        // Clear existing year options
+        yearSelect.innerHTML = '';
+
+        fetch('/get_years?team_name=' + teamSelect.value)
+            .then(response => response.text())
+            .then(yearsResponse => {
+                // split the comma separated string into array of numbers
+                const years = yearsResponse.split(',').map(Number);
+
+                // add each year as an option
+                years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.text = year;
+                    yearSelect.add(option);
+                });
+            });
+    }
+    </script>
 </head>
 <body>
 
 <div class="login-container">
     <h1 style="font-size: 48px;">Enter Team and Year</h1>
 
-      <!-- Form for checking team and year roster -->
     <form action="{{ url_for('main.generate_roster') }}" method="GET" class="button-container">
 
-        <!-- Dropdown for Team Name -->
-        <label for="team" style="font-size: 1.5rem; margin-top: 20px">Select Team</label>
-        <select id="team" name="team">
-            <option value="tigers">Detroit Tigers</option>
-            <option value="yankees">New York Yankees</option>
-            <option value="dodgers">Los Angeles Dodgers</option>
+        <label for="team_name" style="font-size: 1.5rem; margin-top: 20px">Select Team</label>
+        <select id="team_name" name="team_name" onchange="updateYearDropdown()">
+            {% for team in teams %}
+                <option value="{{ team }}">{{ team }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="yearID" style="font-size: 1.5rem; margin-top: 40px">Select Year</label>
+        <select id="yearID" name="yearID">
 
         </select>
 
-        <!-- Dropdown for Year -->
-        <label for="year" style="font-size: 1.5rem; margin-top: 40px">Select Year</label>
-        <select id="year" name="year">
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-
-        </select>
-
-        <!-- Submit button -->
         <input type="submit" style="margin-top: 80px" value="Generate Roster">
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateYearDropdown();
+        });
+    </script>
 
 </div>
 
