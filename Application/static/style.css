@@ -1,32 +1,33 @@
-/* ------------ Handles the styling for the home page ------------ */
 body {
     background-image: url('Images/Epic.jpg');
     background-size: cover; /* Ensures the image covers entire background */
     background-position: center;
     background-repeat: no-repeat;
     font-family: 'Arial', "sans-serif";
-    background-color: #f4f4f4;
+    margin: 0; /* Remove default margins */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    overflow: hidden; /* Prevent scrolling */
 }
 
 .login-container {
     background-color: #fff;
-    min-height: 400px;
-    width: 600px;
-    height: 300px;
-    padding: 60px;
-    border-radius: 20px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    overflow: auto;
+    min-height: 450px; /* Increase minimum height */
+    max-width: 85%; /* Slightly reduce the max width for more padding */
+    width: 650px; /* Increase the width */
+    padding: 50px; /* Add more padding */
+    border-radius: 25px; /* Slightly increase border radius */
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5); /* Slightly stronger shadow */
+    box-sizing: border-box; /* Include padding in width/height calculations */
 }
 
 h1 {
     text-align: center;
     color: darkgreen;
     font-size: 36px;
+    margin-bottom: 30px; /* Add more spacing below the heading */
 }
 
 form {
@@ -35,13 +36,13 @@ form {
 }
 
 label {
-    margin-top: 10px;
+    margin-top: 15px; /* Increase spacing above each label */
     font-size: 14px;
     color: #333;
 }
 
 input[type="text"], input[type="password"] {
-    padding: 10px;
+    padding: 12px; /* Add extra padding for input fields */
     font-size: 16px;
     margin-top: 5px;
     border: 1px solid #ccc;
@@ -49,8 +50,8 @@ input[type="text"], input[type="password"] {
 }
 
 input[type="submit"] {
-    margin-top: 20px;
-    padding: 10px;
+    margin-top: 25px; /* Increase spacing between fields and the button */
+    padding: 12px; /* Add more padding to the button */
     font-size: 16px;
     background-color: darkgreen;
     color: white;
@@ -63,12 +64,11 @@ input[type="submit"]:hover {
     background-color: #45a049;
 }
 
-/* -------- Styling for Create Account Button -------- */
 .btn {
-    margin-top: 20px;
-    padding: 10px;
+    margin-top: 25px; /* Increase spacing */
+    padding: 12px; /* Add more padding */
     font-size: 16px;
-    background-color: darkgreen;
+    background-color: darkred;
     color: white;
     border: none;
     border-radius: 4px;
@@ -78,13 +78,31 @@ input[type="submit"]:hover {
 }
 
 .btn:hover {
-    background-color: #45a049;
+    background-color: red;
 }
-/* -------- Styling for Create Account Button -------- */
-/* ---------------------------------------------------------- */
 
-/* ------------ Handles the styling for the roster grid page ------------ */
-.button-container {
-    margin-top: 40px;
+.flash-messages {
+    color: red;
+    font-weight: bold;
+    margin: 20px 0;
+    padding: 15px; /* Add more padding */
+    border: 1px solid red;
+    background-color: #ffe6e6;
 }
-/* ---------------------------------------------------------- */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-container {
+        width: 100%;
+        padding: 30px; /* Adjust padding for smaller screens */
+        box-sizing: border-box;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    input[type="text"], input[type="password"], input[type="submit"], .btn {
+        font-size: 14px;
+    }
+}

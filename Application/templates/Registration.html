@@ -12,21 +12,33 @@
 <body>
 <div class="login-container">
     <h1>Register Account</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <form action="/register" method="POST">
         <label for="first-name">First Name</label>
-        <input type="text" id="first-name" name="first_name" required>
+        <input type="text" id="first-name" name="first_name" value="{{ first_name or '' }}" required>
 
         <label for="last-name">Last Name</label>
-        <input type="text" id="last-name" name="last_name" required>
+        <input type="text" id="last-name" name="last_name" value="{{ last_name or '' }}" required>
 
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
+        <input type="text" id="username" name="username" value="{{ username or '' }}" required>
 
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+        <input type="password" id="password" name="password" value="{{ '' }}" required>
 
         <label for="confirm-password">Confirm Password</label>
-        <input type="password" id="confirm-password" name="confirm_password" required>
+        <input type="password" id="confirm-password" name="confirm_password" value="{{ '' }}" required>
 
         <input type="submit" value="Register">
 
@@ -35,9 +47,10 @@
                 style="background-color: darkred; color: white;"
                 onmouseover="this.style.backgroundColor='red'"
                 onmouseout="this.style.backgroundColor='darkred'"
-                onclick="window.location.href='{{ url_for('main.home') }}'"
-        >Cancel</button>
+                onclick="window.location.href='{{ url_for('main.home') }}'">
+            Cancel
+        </button>
     </form>
-</div>r
-
+</div>
+</body>
 </html>
