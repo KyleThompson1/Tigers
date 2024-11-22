@@ -2,10 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
 
+<body>
+<div class="login-container">
+    <h1>Admin Dashboard</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('main.ban_user') }}" method="POST" style="margin-top: 20px;">
+        <label for="user" style="font-size: 1.5rem;">Select User</label>
+        <select id="user" name="user" style="margin-top: 10px; width: 100%; padding: 10px; font-size: 1rem;">
+            {% for user in users %}
+            <option value="{{ user.username }}" {% if user.banned %}disabled{% endif %}>
+                {{ user.username }} {% if user.banned %}(Banned){% endif %}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Buttons for Actions -->
+        <div class="action-buttons" style="margin-top: 40px;">
+            <button type="submit" class="btn">Ban User</button>
+            <button type="button" style="background-color: darkgreen; color: white;"
+                    onmouseover="this.style.backgroundColor='#45a049'"
+                    onmouseout="this.style.backgroundColor='darkgreen'"
+                    class="btn">View Requests</button>
+        </div>
+    </form>
+
+    <!-- Return to Home Button -->
+    <button type="button" class="btn" style="background-color: darkgreen; color: white;"
+            onmouseover="this.style.backgroundColor='#45a049'"
+            onmouseout="this.style.backgroundColor='darkgreen'"
+            onclick="window.location.href='{{ url_for('main.home') }}'">
+        Return to Home
+    </button>
+</div>
 </body>
 </html>
