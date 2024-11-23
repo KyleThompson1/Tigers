@@ -7,14 +7,25 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 
 <body>
 <div class="login-container">
     <h1>Welcome to the Tiger Database!</h1>
-    <form action="{{ url_for('main.roster_grid') }}" method="POST">
 
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Login Form -->
+    <form action="{{ url_for('main.login') }}" method="POST">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required>
 
@@ -25,10 +36,13 @@
     </form>
 
     <!-- Create Account button styled to look like the Login button -->
-    <button type="button" class="btn" onclick="window.location.href=
-    '{{ url_for('main.register') }}'">Create Account</button>
-
+    <button type="button" style="background-color: darkgreen; color: white;"
+        onmouseover="this.style.backgroundColor='#45a049'"
+        onmouseout="this.style.backgroundColor='darkgreen'"
+        class="btn"
+        onclick="window.location.href='{{ url_for('main.register') }}'">
+        Create Account
+    </button>
 </div>
 </body>
-
 </html>
