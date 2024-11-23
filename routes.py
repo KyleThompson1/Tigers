@@ -2,7 +2,6 @@ from flask import render_template, Blueprint, request, redirect, url_for, sessio
 import pymysql
 from werkzeug.security import check_password_hash
 from csi3335f2024 import mysql
-import csi3335f2024 as cfg
 
 # --------- LOGIC FOR HTTP REQUESTS WILL BE IN THIS FILE ---------
 # def get_teams():
@@ -105,8 +104,12 @@ def roster_grid():
 
 @main.route('/team_year', methods=['GET'])
 def team_year():
-    con = pymysql.connect(host=cfg.mysql['host'], user=cfg.mysql['user'], password=cfg.mysql['password'],
-                          database=cfg.mysql['database'])
+    con = pymysql.connect(
+        host=mysql["host"],
+        user=mysql["user"],
+        password=mysql["password"],
+        db=mysql["database"]
+    )
     try:
         cur = con.cursor()
         sql = "SELECT DISTINCT team_name FROM teams ORDER BY team_name"
@@ -125,8 +128,12 @@ def generate_roster():
 def get_years():
     team_name = request.args.get('team_name')
 
-    con = pymysql.connect(host=cfg.mysql['host'], user=cfg.mysql['user'], password=cfg.mysql['password'],
-                          database=cfg.mysql['database'])
+    con = pymysql.connect(
+        host=mysql["host"],
+        user=mysql["user"],
+        password=mysql["password"],
+        db=mysql["database"]
+    )
 
     try:
         cur = con.cursor()
