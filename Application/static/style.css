@@ -23,6 +23,18 @@ body {
     box-sizing: border-box; /* Include padding in width/height calculations */
 }
 
+.large-container {
+    background-color: #fff;
+    min-height: 450px; /* Increase minimum height */
+    max-width: 85%; /* Slightly reduce the max width for more padding */
+    width: 1100px; /* Increase the width */
+    padding: 50px; /* Add more padding */
+    border-radius: 25px; /* Slightly increase border radius */
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5); /* Slightly stronger shadow */
+    box-sizing: border-box; /* Include padding in width/height calculations */
+    overflow-y: auto;
+}
+
 h1 {
     text-align: center;
     color: darkgreen;

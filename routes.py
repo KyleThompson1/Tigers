@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint, request, redirect, url_for, session, flash
 import pymysql
+from sqlalchemy.sql.coercions import WhereHavingImpl
 from werkzeug.security import check_password_hash
 from csi3335f2024 import mysql
 
@@ -101,49 +102,6 @@ def play_grid():
 def roster_grid():
     username = session.get('username', 'Guest')  # Get username from session or use 'Guest' as default
     return render_template('Roster-Grid.html', username=username)
-
-@main.route('/team_year', methods=['GET'])
-def team_year():
-    con = pymysql.connect(
-        host=mysql["host"],
-        user=mysql["user"],
-        password=mysql["password"],
-        db=mysql["database"]
-    )
-    try:
-        cur = con.cursor()
-        sql = "SELECT DISTINCT team_name FROM teams ORDER BY team_name"
-        cur.execute(sql)
-        teams = [team[0] for team in cur.fetchall()]
-        return render_template('Team-Year.html', teams=teams)
-
-    finally:
-        con.close()
-
-@main.route('/generate_roster', methods=['GET'])
-def generate_roster():
-    return render_template('Roster.html')
-
-@main.route('/get_years')
-def get_years():
-    team_name = request.args.get('team_name')
-
-    con = pymysql.connect(
-        host=mysql["host"],
-        user=mysql["user"],
-        password=mysql["password"],
-        db=mysql["database"]
-    )
-
-    try:
-        cur = con.cursor()
-        sql = "SELECT DISTINCT yearID FROM teams WHERE team_name = %s ORDER BY yearID DESC"
-        cur.execute(sql, (team_name,))
-        years = [(year[0]) for year in cur.fetchall()]
-        return ','.join(str(year) for year in years)
-
-    finally:
-        con.close()
         
 @main.route('/admin')
 def admin_page():
@@ -281,3 +239,138 @@ def ban_user():
             conn.close()
 
     return redirect(url_for('main.admin_page'))
+
+
+###########GENERATE ROSTER########################
+@main.route('/team_year', methods=['GET'])
+def team_year():
+    con = pymysql.connect(
+        host=mysql["host"],
+        user=mysql["user"],
+        password=mysql["password"],
+        db=mysql["database"]
+    )
+    try:
+        cur = con.cursor()
+        sql = "SELECT DISTINCT team_name FROM teams ORDER BY team_name"
+        cur.execute(sql)
+        teams = [team[0] for team in cur.fetchall()]
+        return render_template('Team-Year.html', teams=teams)
+
+    finally:
+        con.close()
+
+
+@main.route('/get_years')
+def get_years():
+    team_name = request.args.get('team_name')
+
+    con = pymysql.connect(
+        host=mysql["host"],
+        user=mysql["user"],
+        password=mysql["password"],
+        db=mysql["database"]
+    )
+
+    try:
+        cur = con.cursor()
+        sql = "SELECT DISTINCT yearID FROM teams WHERE team_name = %s ORDER BY yearID DESC"
+        cur.execute(sql, (team_name,))
+        years = [(year[0]) for year in cur.fetchall()]
+        return ','.join(str(year) for year in years)
+
+    finally:
+        con.close()
+
+
+@main.route('/generate_roster')
+def generate_roster():
+    team_name = request.args.get('team_name')
+    year = request.args.get('yearID')
+
+    connection = pymysql.connect(
+        host=mysql["host"],
+        user=mysql["user"],
+        password=mysql["password"],
+        db=mysql["database"]
+    )
+
+    try:
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            # Batting Leaders Query
+            batting_sql = """
+            SELECT 
+                people.playerID, 
+                nameFirst, 
+                nameLast, 
+                b_G,
+                b_SB,
+                b_AB, 
+                b_H, 
+                b_HR, 
+                b_R, 
+                b_RBI,
+                ROUND(((b_2B) + (2 * b_3B) + (3 * b_HR)) / b_AB, 3) AS ISO,
+                ROUND((b_H - b_HR)/(b_AB - b_SO - b_HR + b_SF), 3) AS BABIP,
+                ROUND((b_H/b_AB), 3) AS AVG,
+                ROUND((b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 3) AS OBP,
+                ROUND(((b_H - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) * 1.0 / NULLIF(b_AB, 0), 3) AS SLG,
+                ROUND(
+                (
+                    (0.690 * (b_BB - b_IBB)) +
+                    (0.722 * b_HBP) +
+                    (0.888 * (b_H - b_2B - b_3B - b_HR)) +
+                    (1.271 * b_2B) +
+                    (1.616 * b_3B) +
+                    (2.101 * b_HR)
+                ) * 1.0 / 
+                NULLIF((b_AB + b_BB - b_IBB + b_SF + b_HBP), 0),4) AS wOBA
+            FROM batting 
+            JOIN people ON batting.playerID = people.playerID
+            WHERE batting.yearID = %s
+            AND batting.teamID = (
+                SELECT teamID 
+                FROM teams 
+                WHERE team_name = %s AND yearID = %s
+            )
+            ORDER BY b_H DESC
+            LIMIT 10
+            """
+
+            # Pitching Leaders Query
+            pitching_sql = """
+            SELECT 
+                people.playerID, 
+                nameFirst, 
+                nameLast, 
+                p_G,
+                p_GS,
+                p_IPouts,
+                p_BB
+            FROM pitching 
+            JOIN people ON pitching.playerID = people.playerID
+            WHERE pitching.teamID = (
+                SELECT teamID 
+                FROM teams 
+                WHERE team_name = %s AND yearID = %s
+            ) AND pitching.yearID = %s
+            ORDER BY p_G DESC
+            LIMIT 10
+            """
+
+            # Execute batting query
+            cursor.execute(batting_sql, (year, team_name, year))
+            batting_leaders = cursor.fetchall()
+
+            # Execute pitching query
+            cursor.execute(pitching_sql, (team_name, year, year))
+            pitching_leaders = cursor.fetchall()
+
+        return render_template('roster.html',
+                               team_name=team_name,
+                               year=year,
+                               batting_leaders=batting_leaders,
+                               pitching_leaders=pitching_leaders)
+
+    finally:
+        connection.close()

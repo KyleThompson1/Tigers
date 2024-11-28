@@ -5,16 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roster</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
-    <!-- Link to Google Fonts for global font styling -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Link to global stylesheet -->
     <link rel="stylesheet" href="../static/style.css">
+    <title>{{ team_name }} {{ year }} Roster</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        h1, h2 {
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1 style="font-size: 48px;">Team Roster</h1>
+    <div class="large-container">
+        <h1>{{ team_name }} || {{ year }} Stats</h1>
 
-        <h1 style="margin-top: 150px">[Display Roster Here]</h1>
+        <h2>Batting Leaders</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>G</th>
+                    <th>HR</th>
+                    <th>SB</th>
+                    <th>ISO</th>
+                    <th>BABIP</th>
+                    <th>AVG</th>
+                    <th>OBP</th>
+                    <th>SLG</th>
+                    <th>wOBA</th>
+                    <th>AB</th>
+                    <th>H</th>
+                    <th>R</th>
+                    <th>RBI</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in batting_leaders %}
+                <tr>
+                    <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
+                    <td>{{ player.b_G }}</td>
+                    <td>{{ player.b_HR }}</td>
+                    <td>{{ player.b_SB }}</td>
+                    <td>{{ player.ISO }}</td>
+                    <td>{{ player.BABIP }}</td>
+                    <td>{{ player.AVG }}</td>
+                    <td>{{ player.OBP }}</td>
+                    <td>{{ player.SLG }}</td>
+                    <td>{{ player.wOBA }}</td>
+                    <td>{{ player.b_AB }}</td>
+                    <td>{{ player.b_H }}</td>
+                    <td>{{ player.b_R }}</td>
+                    <td>{{ player.b_RBI }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Pitching Leaders</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>G</th>
+                    <th>GS</th>
+                    <th>IP</th>
+                    <th>BB</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in pitching_leaders %}
+                <tr>
+                    <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
+                    <td>{{ player.p_G }}</td>
+                    <td>{{ player.p_GS }}</td>
+                    <td>{{ player.p_IPouts }}</td>
+                    <td>{{ player.p_BB }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+
+
+
+
 
         <!-- Try Again button redirects to the same page -->
         <form action="{{ url_for('main.team_year') }}" style="margin-top: 200px" method="GET">
@@ -25,8 +121,6 @@
         <form action="{{ url_for('main.home') }}" method="GET">
             <input type="submit" style="margin-top: 20px" value="Home">
         </form>
-
     </div>
 </body>
-
 </html>
