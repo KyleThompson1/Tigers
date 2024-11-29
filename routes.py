@@ -346,6 +346,7 @@ def generate_roster():
                 p_G,
                 p_GS,
                 p_IPouts,
+                ROUND((p_H + p_BB + p_HBP - p_R)/(p_H + p_BB + p_HBP - (1.4 * p_HR)), 3) AS LOB,
                 p_BB
             FROM pitching 
             JOIN people ON pitching.playerID = people.playerID
