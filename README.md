@@ -13,7 +13,7 @@ This project uses **Python 3.10 or higher** and dependencies listed in `requirem
 
 Key features:  
 - **User Support**: Account creation and login/logout functionality.  
-- **Roster Requests**: Generate a baseball team roster by specifying a team and yearID.  
+- **Roster Requests**: Generate a baseball team roster by specifying a team and year.  
 - **Game Mode**: Play the **Immaculate Grid**.  
 - **Admin Management**: Admin can view team roster requests and manage user access.  
 
