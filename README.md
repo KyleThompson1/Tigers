@@ -64,9 +64,13 @@ Follow these steps to launch the application:
 ---
 
 ## 🌟 Extra Credit
-Extra credit features are detailed below. 🎉  
-
-
+- **Admin Unban**: The admin user can unban a user after they have been banned.
+- **Admin View Total Requests**: Admin user can view the total number of roster requests from all users.
+- **Admin View User Requests**: Admin user can view each user's individual roster requests with timestamps.
+- **User Profile**: Users can view their profile page and see their full name, username, and request count.
+- **User Profile Roster Requests**: Users can view their own roster requests in the form of a scroll down menu.
+- **User Profile Pics**: Users can choose from 8 images for a profile picture to customize their Tiger DB experience.
+  
 ---
 
 ### ✨ Thank you for using the Tigers Database!
