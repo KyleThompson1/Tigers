@@ -3,53 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin Dashboard</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
 
+    <style>
+        /* Apply green color to all bold text */
+        strong {
+            color: green;
+        }
+    </style>
+
+</head>
 <body>
 <div class="login-container">
     <h1>Admin Dashboard</h1>
 
+    <!-- Display the total number of requests -->
+    <div style="font-size: 1.5rem; margin-bottom: 20px;">
+        <strong>Total Requests from Users: {{ total_requests }}</strong>
+    </div>
+
     <!-- Flash Messages -->
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <p>{{ message }}</p>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('main.ban_user') }}" method="POST" style="margin-top: 20px;">
-        <label for="user" style="font-size: 1.5rem;">Select User</label>
-        <select id="user" name="user" style="margin-top: 10px; width: 100%; padding: 10px; font-size: 1rem;">
+    <!-- For Roster Requests -->
+    <form method="GET" action="{{ url_for('main.view_roster_requests') }}" style="margin-top: 20px;">
+        <label for="userSelect" style="font-size: 1.5rem;"><b>View Requests</b></label>
+        <select id="userSelect" name="user_id" style="margin-top: 10px; width: 100%; padding: 10px; font-size: 1rem;" onchange="this.form.submit()">
             {% for user in users %}
-            <option value="{{ user.username }}" {% if user.banned %}disabled{% endif %}>
-                {{ user.username }} {% if user.banned %}(Banned){% endif %}
+            <option value="{{ user[0] }}"
+                    {% if request.args.get('user_id') == user[0]|string %}selected{% endif %}
+                    style="color: {% if user[2] %}gray{% else %}black{% endif %};">
+                {{ user[1] }} {% if user[2] %}(Banned){% endif %}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- Displaying Roster Requests -->
+    {% if roster_requests %}
+        <h3><strong>Roster Requests for {{ selected_username }} ({{ selected_user_request_count }})</strong></h3>
+        <div class="roster-requests-list">
+            {% for request in roster_requests %}
+            <div class="roster-request-item">
+                <b>{{ request[2] }}</b> ({{ request[3] }}) - <b>Timestamp:</b> {{ request[4] }}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No roster requests found for this user.</p>
+    {% endif %}
+
+    <!-- For Banning and Unbanning -->
+    <form action="{{ url_for('main.manage_user') }}" method="POST" style="margin-top: 20px;">
+        <label for="userSelect" style="font-size: 1.5rem;"><b>Ban/Unban</b></label>
+        <select id="userSelect" name="username" style="margin-top: 10px; width: 100%; padding: 10px; font-size: 1rem;">
+            {% for user in users %}
+            <option value="{{ user[1] }}"
+                    {% if request.args.get('username') == user[1] %}selected{% endif %}
+                    style="color: {% if user[2] %}gray{% else %}black{% endif %};">
+                {{ user[1] }} {% if user[2] %}(Banned){% endif %}
             </option>
             {% endfor %}
         </select>
 
-        <!-- Buttons for Actions -->
-        <div class="action-buttons" style="margin-top: 40px;">
-            <button type="submit" class="btn">Ban User</button>
-            <button type="button" style="background-color: darkgreen; color: white;"
-                    onmouseover="this.style.backgroundColor='#45a049'"
-                    onmouseout="this.style.backgroundColor='darkgreen'"
-                    class="btn">View Requests</button>
+        <div class="action-buttons" style="margin-top: 20px;">
+            <button type="submit" name="action" value="ban" class="btn"
+                style="background-color: darkred; color: white;"
+                onmouseover="this.style.backgroundColor='red'"
+                onmouseout="this.style.backgroundColor='darkred'">
+                Ban User
+            </button>
+            <button type="submit" name="action" value="unban" class="btn"
+                style="background-color: darkgreen; color: white;"
+                onmouseover="this.style.backgroundColor='#45a049'"
+                onmouseout="this.style.backgroundColor='darkgreen'">
+                Unban User
+            </button>
         </div>
     </form>
 
-    <!-- Return to Home Button -->
-    <button type="button" class="btn" style="background-color: darkgreen; color: white;"
-            onmouseover="this.style.backgroundColor='#45a049'"
-            onmouseout="this.style.backgroundColor='darkgreen'"
-            onclick="window.location.href='{{ url_for('main.home') }}'">
-        Return to Home
+    <!-- Logout -->
+    <button type="button" class="btn"
+        style="background-color: darkgreen; color: white;"
+        onclick="window.location.href='{{ url_for('main.home') }}'"
+        onmouseover="this.style.backgroundColor='#45a049'"
+        onmouseout="this.style.backgroundColor='darkgreen'">
+        Logout
     </button>
 </div>
 </body>

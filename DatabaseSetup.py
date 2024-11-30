@@ -52,6 +52,21 @@ def initialize_database():
     # Execute SQL code to create the users table
     cursor.execute(create_users_table_sql)
 
+    # SQL code to create the roster_requests table in the Tigers database
+    create_roster_requests_table_sql = """
+    CREATE TABLE IF NOT EXISTS roster_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT(11) NOT NULL,
+        team_name VARCHAR(255) NOT NULL,
+        yearID INT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+    """
+
+    # Execute SQL code to create the roster_requests table
+    cursor.execute(create_roster_requests_table_sql)
+
     # Hash the admin password using Scrypt (to maintain consistency with other users)
     admin_password = "adminpass"
     hashed_password = generate_password_hash(admin_password, method='scrypt')
