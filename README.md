@@ -2,7 +2,7 @@
 
 # 🐯 Fall 2024 Database Project - Tigers
 
-**📅 November 22, 2024**  
+**📅 November 30, 2024**  
 **👥 Team Members:** Jacob Celis, Jan Jasa, Kyle Thompson, Mark Josephs  
 
 ---
@@ -51,8 +51,8 @@ Follow these steps to launch the application:
 ## 🔄 Updates
 
 ### New Tables Added:
-- **`users` table**: Includes the default admin account upon the first run.  
-- **`requests` table**: Logs all team and yearID queries for generating team rosters. Logs are accessible via the admin dashboard.  
+- **users table**: Includes the default admin account upon the first run.  
+- **roster_requests table**: Logs all team and yearID queries for generating team rosters. Logs are accessible via the admin dashboard.  
 
 ### Updated Data:
 - The Tigers Database has been updated with stats from the **2023 MLB season**.  
@@ -65,6 +65,7 @@ Follow these steps to launch the application:
 
 ## 🌟 Extra Credit
 Extra credit features are detailed below. 🎉  
+
 
 ---
 
