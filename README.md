@@ -1,6 +1,6 @@
 
 
-# 🐯 Fall 2024 Database Project - Tigers
+# 🐯 Fall 2024 Project - Tigers Database
 
 **📅 November 30, 2024**  
 **👥 Team Members:** Jacob Celis, Jan Jasa, Kyle Thompson, Mark Josephs  
@@ -9,31 +9,31 @@
 
 ## 📖 Project Description
 
-This project uses **Python 3.10 or higher** and the dependencies outlined in `requirements.txt`. It integrates the **Tigers Database**, a baseball database with updated stats from the **2023 MLB season** taken from the Lahman baseball database.
+This project uses **Python 3.10 or higher** and dependencies listed in `requirements.txt`. It integrates the **Tigers Database**, a baseball database with updated stats from the **2023 MLB season** taken from the Lahman baseball database.
 
 Key features:  
-- **User Management**: Account creation and login functionality.  
-- **Roster Queries**: Generate team rosters by specifying a team and yearID.  
+- **User Support**: Account creation and login/logout functionality.  
+- **Roster Requests**: Generate a baseball team roster by specifying a team and yearID.  
 - **Game Mode**: Play the **Immaculate Grid**.  
-- **Admin Control**: Admin can review database requests and manage user access (including banning users).  
+- **Admin Management**: Admin can view team roster requests and manage user access.  
 
-The configuration file `csi3335f2024.py` provides all details to connect to the Tigers Database. Use `run.py` to start the web application.
+The configuration file `csi3335f2024.py` provides information to connect to the Tigers Database. Use `run.py` to start the web application.
 
 ---
 
 ## 🔑 Admin Access
 
 The admin dashboard enables:  
-1. **Viewing Team Roster Requests** by users.  
-2. **Banning Users** from the web application.  
+1. **Viewing Team Roster Requests**: Both the total request count and individual user requests.
+2. **Banning and Unbanning Users** from accessing the Tigers Database.
 
-**Default Admin Credentials:**  
+**Admin Login Information:**  
 - **Username:** `admin`  
 - **Password:** `adminpass`  
 
 ---
 
-## 🚀 How to Run the Web Application
+## 🚀 Running the Web Application
 
 Follow these steps to launch the application:  
 
@@ -51,15 +51,15 @@ Follow these steps to launch the application:
 ## 🔄 Updates
 
 ### New Tables Added:
-- **users table**: Includes the default admin account upon the first run.  
-- **roster_requests table**: Logs all team and yearID queries for generating team rosters. Logs are accessible via the admin dashboard.  
+- **users table**: Includes admin account upon the first run and stores all users for accessing the web app. 
+- **roster_requests table**: Logs all team and yearID queries for generating team rosters. Requests are accessible via the admin dashboard.  
 
 ### Updated Data:
 - The Tigers Database has been updated with stats from the **2023 MLB season**.  
 - `Tigers.sql` includes the schema and new data.
 
 ### Database Initialization:
-- The setup code for these additional tables can be found in `DatabaseSetup.py`.
+- The setup code for these additional tables can be found in `DatabaseSetup.py` (users and roster_requests).
 
 ---
 
