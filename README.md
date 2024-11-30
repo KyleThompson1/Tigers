@@ -52,7 +52,7 @@ Follow these steps to launch the application:
 
 ### New Tables Added:
 - **users table**: Includes admin account upon the first run and stores all users for accessing the web app. 
-- **roster_requests table**: Logs all team and yearID queries for generating team rosters. Requests are accessible via the admin dashboard.  
+- **roster_requests table**: Logs all team and year queries for generating team rosters. Requests are accessible via the admin dashboard.  
 
 ### Updated Data:
 - The Tigers Database has been updated with stats from the **2023 MLB season**.  
