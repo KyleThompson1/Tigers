@@ -15,7 +15,21 @@
     <div class="login-container">
         <h1>Immaculate Grid</h1>
 
-        <h1 style="margin-top: 150px">[Insert Immaculate Grid Here]</h1>
+        <form action="/query" method="post">
+            <label for="team">Team:</label>
+            <input type="text" id="team" name="team" placeholder="e.g., NYY" required>
+            <br><br>
+
+            <label for="condition">Condition:</label>
+            <select id="condition" name="condition" required>
+                <option value=".300+ AVG CAREER">.300+ AVG CAREER</option>
+                <option value="30+ HR SEASON">30+ HR SEASON</option>
+                <!-- Add more options here -->
+            </select>
+            <br><br>
+
+            <button type="submit">Find Player</button>
+        </form>
 
         <!-- Home button redirects to the homepage -->
         <form action="{{ url_for('main.home') }}" method="GET">

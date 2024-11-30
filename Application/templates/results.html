@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Results</title>
+</head>
+<body>
+    <h1>Players matching "{{ condition }}" for team "{{ team }}"</h1>
+
+    {% if players %}
+    <ul>
+        {% for player in players %}
+        <li>{{ player.nameFirst }} {{ player.nameLast }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No players found.</p>
+    {% endif %}
+
+    <a href="/">Go back</a>
+</body>
+</html>

@@ -281,3 +281,51 @@ def ban_user():
             conn.close()
 
     return redirect(url_for('main.admin_page'))
+
+@main.route('/query', methods=['POST'])
+def query_player():
+    team = request.form.get('team')
+    condition = request.form.get('condition')
+
+    # Map conditions to SQL queries
+    condition_map = {
+        '.300+ AVG CAREER': """
+            SELECT p.nameFirst, p.nameLast 
+            FROM batting b
+            JOIN people p ON b.playerID = p.playerID
+            WHERE (b.H / b.AB) >= 0.300
+            GROUP BY b.playerID
+        """,
+        '30+ HR SEASON': """
+            SELECT p.nameFirst, p.nameLast 
+            FROM batting b
+            JOIN people p ON b.playerID = p.playerID
+            WHERE b.HR >= 30 AND b.teamID = :team
+        """,
+        # Add more conditions here
+    }
+
+    if condition not in condition_map:
+        return "Condition not supported", 400
+
+    query = condition_map[condition]
+
+    try:
+        conn = pymysql.connect(
+            host=mysql["host"],
+            user=mysql["user"],
+            password=mysql["password"],
+            db=mysql["database"]
+        )
+        cursor = conn.cursor()
+
+        result = cursor.execute(query, {"team": team})
+        players = result.fetchall()
+
+        if not players:
+            return f"No players found for condition '{condition}' on team '{team}'."
+
+        return render_template('results.html', players=players, condition=condition, team=team)
+    except pymysql.Error as e:
+        print(f"Database error: {e}")
+        flash(f"Database error: {e}")
