@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <!-- Link to Google Fonts for global font styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Link to global stylesheet -->
+    <link rel="stylesheet" href="../static/style.css">
+
+    <style>
+        /* Apply green color to all bold text */
+        strong {
+            color: green;
+        }
+    </style>
+
+    <script>
+        function togglePreferences() {
+            var preferencesSection = document.getElementById('preferences-section');
+            // Toggle the display style between 'none' and 'block'
+            preferencesSection.style.display = preferencesSection.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+
+</head>
+<body>
+
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <h1>{{ username }}'s Profile</h1>
+        <!-- Display selected profile picture -->
+        <img src="{{ url_for('static', filename='Images/' + profile_pic) }}" style="margin-top: 20px" alt="Profile Picture">
+    </div>
+
+    <!-- Personal Information -->
+    <div class="personal-info">
+        <h3><strong>Personal Information</strong></h3>
+        <p><b>Full Name:</b> {{ first_name }} {{ last_name }}</p>
+        <p><b>Username:</b> {{ username }}</p>
+        <p><b>Number of Requests:</b> {{ roster_request_count }}</p>
+    </div>
+
+    <!-- Roster Requests -->
+    <div class="roster-requests">
+        <h3><strong>Your Roster Requests</strong></h3>
+        {% if roster_requests %}
+            <div class="roster-requests-list">
+                {% for request in roster_requests %}
+                    <div class="roster-request-item">
+                        <b>{{ request[1] }}</b> ({{ request[2] }})
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You haven't made any roster requests yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Preferences Button -->
+    <button class="btn preferences-btn" onclick="togglePreferences()">Change Profile Pic</button>
+
+    <!-- Preferences Section (Hidden by default) -->
+    <div id="preferences-section" style="display: none;">
+        <!-- Profile Picture Selection -->
+        <div class="profile-pic-selection">
+            <h3>Options:</h3>
+            <form action="{{ url_for('main.change_profile_pic') }}" method="POST" class="pic-form">
+                <div class="profile-pic-options">
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicOne.png') }}" alt="Option 1">
+                        <input type="radio" name="profile_pic" value="PicOne.png" {% if profile_pic == 'PicOne.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicTwo.png') }}" alt="Option 2">
+                        <input type="radio" name="profile_pic" value="PicTwo.png" {% if profile_pic == 'PicTwo.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicThree.png') }}" alt="Option 3">
+                        <input type="radio" name="profile_pic" value="PicThree.png" {% if profile_pic == 'PicThree.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicFour.png') }}" alt="Option 4">
+                        <input type="radio" name="profile_pic" value="PicFour.png" {% if profile_pic == 'PicFour.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicFive.png') }}" alt="Option 5">
+                        <input type="radio" name="profile_pic" value="PicFive.png" {% if profile_pic == 'PicFive.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicSix.png') }}" alt="Option 6">
+                        <input type="radio" name="profile_pic" value="PicSix.png" {% if profile_pic == 'PicSix.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicSeven.png') }}" alt="Option 7">
+                        <input type="radio" name="profile_pic" value="PicSeven.png" {% if profile_pic == 'PicSeven.png' %}checked{% endif %}>
+                    </label>
+                    <label>
+                        <img src="{{ url_for('static', filename='Images/PicEight.png') }}" alt="Option 8">
+                        <input type="radio" name="profile_pic" value="PicEight.png" {% if profile_pic == 'PicEight.png' %}checked{% endif %}>
+                    </label>
+                </div>
+                <input type="submit" class="btn" value="Update">
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Actions -->
+    <div class="profile-actions">
+        <form action="{{ url_for('main.roster_grid') }}" method="POST">
+            <input type="submit" class="btn" value="Home">
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
