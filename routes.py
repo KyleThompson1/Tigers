@@ -359,6 +359,7 @@ def generate_roster():
             LIMIT 10
             """
 
+
             # Execute batting query
             cursor.execute(batting_sql, (year, team_name, year))
             batting_leaders = cursor.fetchall()
