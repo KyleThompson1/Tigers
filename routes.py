@@ -290,17 +290,17 @@ def query_player():
     # Map conditions to SQL queries
     condition_map = {
         '.300+ AVG CAREER': """
-            SELECT p.nameFirst, p.nameLast 
+            SELECT DISTINCT p.nameFirst, p.nameLast 
             FROM batting b
             JOIN people p ON b.playerID = p.playerID
             WHERE (b.b_H / b.b_AB) >= 0.300 AND b.teamID = %s
             GROUP BY b.playerID
         """,
         '30+ HR SEASON': """
-            SELECT p.nameFirst, p.nameLast 
+            SELECT DISTINCT p.nameFirst, p.nameLast 
             FROM batting b
             JOIN people p ON b.playerID = p.playerID
-            WHERE b.HR >= 30 AND b.teamID = :team
+            WHERE b.b_HR >= 30 AND b.teamID = %s
         """,
         # Add more conditions here
     }
@@ -324,8 +324,6 @@ def query_player():
 
         if not players:
             return f"No players found for condition '{condition}' on team '{team}'."
-
-        print(players)
 
         return render_template('results.html', players=players, condition=condition, team=team)
     except pymysql.Error as e:
