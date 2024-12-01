@@ -293,7 +293,7 @@ def query_player():
             SELECT p.nameFirst, p.nameLast 
             FROM batting b
             JOIN people p ON b.playerID = p.playerID
-            WHERE (b.H / b.AB) >= 0.300
+            WHERE (b.b_H / b.b_AB) >= 0.300 AND b.teamID = %s
             GROUP BY b.playerID
         """,
         '30+ HR SEASON': """
@@ -319,11 +319,13 @@ def query_player():
         )
         cursor = conn.cursor()
 
-        result = cursor.execute(query, {"team": team})
-        players = result.fetchall()
+        cursor.execute(query, (team,))
+        players = cursor.fetchall()
 
         if not players:
             return f"No players found for condition '{condition}' on team '{team}'."
+
+        print(players)
 
         return render_template('results.html', players=players, condition=condition, team=team)
     except pymysql.Error as e:
