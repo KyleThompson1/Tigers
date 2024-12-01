@@ -281,6 +281,18 @@ def query_player():
             JOIN people p ON b.playerID = p.playerID
             WHERE b.b_HR >= 30 AND b.teamID = %s
         """,
+        '100+ Run Season': """
+            SELECT DISTINCT p.nameFirst, p.nameLast
+            FROM batting b
+            JOIN people p ON b.playerId = p.playerId
+            WHERE b.b_H > 100 AND b.teamID = %s
+        """,
+        'All Star': """
+            SELECT DISTINCT p.nameFirst, p.nameLast
+            FROM allstarfull a
+            JOIN people p ON a.playerId = p.playerID
+            WHERE a.teamId = %s
+        """
         # Add more conditions here
     }
 
