@@ -87,49 +87,6 @@ def roster_grid():
     username = session.get('username', 'Guest')  # Get username from session or use 'Guest' as default
     return render_template('Roster-Grid.html', username=username)
 
-@main.route('/generate_roster', methods=['GET'])
-def generate_roster():
-    team_name = request.args.get('team_name')
-    year_id = request.args.get('yearID')
-
-    if team_name and year_id:
-        # Retrieve user_id from session
-        user_id = session.get('user_id')
-
-        if user_id is None:
-            flash("You must be logged in to request a roster.")
-            return redirect(url_for('auth.login'))  # Redirect to login if not logged in
-
-        # Log the request in the roster_requests table
-        con = pymysql.connect(
-            host=mysql["host"],
-            user=mysql["user"],
-            password=mysql["password"],
-            db=mysql["database"]
-        )
-        try:
-            cursor = con.cursor()
-
-            # Insert the request data into the 'roster_requests' table
-            sql_log = """
-            INSERT INTO roster_requests (user_id, team_name, yearID)
-            VALUES (%s, %s, %s)
-            """
-            cursor.execute(sql_log, (user_id, team_name, year_id))
-            con.commit()
-
-            flash(f"Roster request for {team_name} ({year_id}) logged successfully.")
-
-            # Render a message confirming the request or redirect to another page
-            return render_template('Roster.html', team_name=team_name, year_id=year_id)
-
-        finally:
-            con.close()
-
-    else:
-        flash("Please select both team and year.")
-        return redirect(url_for('main.team_year'))
-
 @main.route('/get_years')
 def get_years():
     team_name = request.args.get('team_name')
@@ -400,14 +357,14 @@ def get_roster_requests_profile(user_id):
         password=mysql["password"],
         db=mysql["database"]
     )
-
     try:
         cur = con.cursor()
-        sql = "SELECT DISTINCT yearID FROM teams WHERE team_name = %s ORDER BY yearID DESC"
-        cur.execute(sql, (team_name,))
-        years = [(year[0]) for year in cur.fetchall()]
-        return ','.join(str(year) for year in years)
-
+        sql_roster_requests = """
+        SELECT id, team_name, yearID FROM roster_requests WHERE user_id = %s ORDER BY timestamp DESC
+        """
+        cur.execute(sql_roster_requests, (user_id,))
+        roster_requests = cur.fetchall()  # Fetch the roster requests for the user
+        return roster_requests
     finally:
         con.close()
 
@@ -435,7 +392,7 @@ def generate_roster():
     team_name = request.args.get('team_name')
     year = request.args.get('yearID')
 
-    if team_name and year_id:
+    if team_name and year:
         # Retrieve user_id from session
         user_id = session.get('user_id')
 
@@ -450,99 +407,100 @@ def generate_roster():
             password=mysql["password"],
             db=mysql["database"]
         )
+
         try:
             cursor = con.cursor()
 
             with con.cursor(pymysql.cursors.DictCursor) as cursor:
             # Batting Leaders Query
-            batting_sql = """
-            SELECT 
-                people.playerID, 
-                nameFirst, 
-                nameLast, 
-                b_G,
-                b_SB,
-                b_AB, 
-                b_H, 
-                b_HR, 
-                b_R, 
-                b_RBI,
-                ROUND(((b_2B) + (2 * b_3B) + (3 * b_HR)) / b_AB, 3) AS ISO,
-                ROUND((b_H - b_HR)/(b_AB - b_SO - b_HR + b_SF), 3) AS BABIP,
-                ROUND((b_H/b_AB), 3) AS AVG,
-                ROUND((b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 3) AS OBP,
-                ROUND(((b_H - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) * 1.0 / NULLIF(b_AB, 0), 3) AS SLG,
-                ROUND(
-                (
-                    (0.690 * (b_BB - b_IBB)) +
-                    (0.722 * b_HBP) +
-                    (0.888 * (b_H - b_2B - b_3B - b_HR)) +
-                    (1.271 * b_2B) +
-                    (1.616 * b_3B) +
-                    (2.101 * b_HR)
-                ) * 1.0 / 
-                NULLIF((b_AB + b_BB - b_IBB + b_SF + b_HBP), 0),4) AS wOBA
-            FROM batting 
-            JOIN people ON batting.playerID = people.playerID
-            WHERE batting.yearID = %s
-            AND batting.teamID = (
-                SELECT teamID 
-                FROM teams 
-                WHERE team_name = %s AND yearID = %s
-            )
-            ORDER BY b_H DESC
-            LIMIT 10
-            """
+                batting_sql = """
+                SELECT 
+                    people.playerID, 
+                    nameFirst, 
+                    nameLast, 
+                    b_G,
+                    b_SB,
+                    b_AB, 
+                    b_H, 
+                    b_HR, 
+                    b_R, 
+                    b_RBI,
+                    ROUND(((b_2B) + (2 * b_3B) + (3 * b_HR)) / b_AB, 3) AS ISO,
+                    ROUND((b_H - b_HR)/(b_AB - b_SO - b_HR + b_SF), 3) AS BABIP,
+                    ROUND((b_H/b_AB), 3) AS AVG,
+                    ROUND((b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 3) AS OBP,
+                    ROUND(((b_H - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) * 1.0 / NULLIF(b_AB, 0), 3) AS SLG,
+                    ROUND(
+                    (
+                        (0.690 * (b_BB - b_IBB)) +
+                        (0.722 * b_HBP) +
+                        (0.888 * (b_H - b_2B - b_3B - b_HR)) +
+                        (1.271 * b_2B) +
+                        (1.616 * b_3B) +
+                        (2.101 * b_HR)
+                    ) * 1.0 / 
+                    NULLIF((b_AB + b_BB - b_IBB + b_SF + b_HBP), 0),4) AS wOBA
+                FROM batting 
+                JOIN people ON batting.playerID = people.playerID
+                WHERE batting.yearID = %s
+                AND batting.teamID = (
+                    SELECT teamID 
+                    FROM teams 
+                    WHERE team_name = %s AND yearID = %s
+                )
+                ORDER BY b_H DESC
+                LIMIT 10
+                """
 
-            # Pitching Leaders Query
-            pitching_sql = """
-            SELECT 
-                people.playerID, 
-                nameFirst, 
-                nameLast, 
-                p_G,
-                p_GS,
-                p_IPouts,
-                ROUND((p_H + p_BB + p_HBP - p_R)/(p_H + p_BB + p_HBP - (1.4 * p_HR)), 3) AS LOB,
-                p_BB
-            FROM pitching 
-            JOIN people ON pitching.playerID = people.playerID
-            WHERE pitching.teamID = (
-                SELECT teamID 
-                FROM teams 
-                WHERE team_name = %s AND yearID = %s
-            ) AND pitching.yearID = %s
-            ORDER BY p_G DESC
-            LIMIT 10
-            """
+                # Pitching Leaders Query
+                pitching_sql = """
+                SELECT 
+                    people.playerID, 
+                    nameFirst, 
+                    nameLast, 
+                    p_G,
+                    p_GS,
+                    p_IPouts,
+                    ROUND((p_H + p_BB + p_HBP - p_R)/(p_H + p_BB + p_HBP - (1.4 * p_HR)), 3) AS LOB,
+                    p_BB
+                FROM pitching 
+                JOIN people ON pitching.playerID = people.playerID
+                WHERE pitching.teamID = (
+                    SELECT teamID 
+                    FROM teams 
+                    WHERE team_name = %s AND yearID = %s
+                ) AND pitching.yearID = %s
+                ORDER BY p_G DESC
+                LIMIT 10
+                """
 
 
-            # Execute batting query
-            cursor.execute(batting_sql, (year, team_name, year))
-            batting_leaders = cursor.fetchall()
+                # Execute batting query
+                cursor.execute(batting_sql, (year, team_name, year))
+                batting_leaders = cursor.fetchall()
 
-            # Execute pitching query
-            cursor.execute(pitching_sql, (team_name, year, year))
-            pitching_leaders = cursor.fetchall()
+                # Execute pitching query
+                cursor.execute(pitching_sql, (team_name, year, year))
+                pitching_leaders = cursor.fetchall()
 
-      
-            
-            # Insert the request data into the 'roster_requests' table
-            sql_log = """
-            INSERT INTO roster_requests (user_id, team_name, yearID)
-            VALUES (%s, %s, %s)
-            """
-            cursor.execute(sql_log, (user_id, team_name, year_id))
-            con.commit()
 
-            flash(f"Roster request for {team_name} ({year_id}) logged successfully.")
 
-            # Render a message confirming the request or redirect to another page
-            return render_template('roster.html',
-                               team_name=team_name,
-                               year=year,
-                               batting_leaders=batting_leaders,
-                               pitching_leaders=pitching_leaders)
+                # Insert the request data into the 'roster_requests' table
+                sql_log = """
+                INSERT INTO roster_requests (user_id, team_name, yearID)
+                VALUES (%s, %s, %s)
+                """
+                cursor.execute(sql_log, (user_id, team_name, year))
+                con.commit()
+
+                flash(f"Roster request for {team_name} ({year}) logged successfully.")
+
+                # Render a message confirming the request or redirect to another page
+                return render_template('roster.html',
+                                   team_name=team_name,
+                                   year=year,
+                                   batting_leaders=batting_leaders,
+                                   pitching_leaders=pitching_leaders)
 
         finally:
             con.close()
