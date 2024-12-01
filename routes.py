@@ -86,49 +86,6 @@ def play_grid():
 def roster_grid():
     username = session.get('username', 'Guest')  # Get username from session or use 'Guest' as default
     return render_template('Roster-Grid.html', username=username)
-#
-# @main.route('/generate_roster', methods=['GET'])
-# def generate_roster():
-#     team_name = request.args.get('team_name')
-#     year_id = request.args.get('yearID')
-#
-#     if team_name and year_id:
-#         # Retrieve user_id from session
-#         user_id = session.get('user_id')
-#
-#         if user_id is None:
-#             flash("You must be logged in to request a roster.")
-#             return redirect(url_for('auth.login'))  # Redirect to login if not logged in
-#
-#         # Log the request in the roster_requests table
-#         con = pymysql.connect(
-#             host=mysql["host"],
-#             user=mysql["user"],
-#             password=mysql["password"],
-#             db=mysql["database"]
-#         )
-#         try:
-#             cursor = con.cursor()
-#
-#             # Insert the request data into the 'roster_requests' table
-#             sql_log = """
-#             INSERT INTO roster_requests (user_id, team_name, yearID)
-#             VALUES (%s, %s, %s)
-#             """
-#             cursor.execute(sql_log, (user_id, team_name, year_id))
-#             con.commit()
-#
-#             flash(f"Roster request for {team_name} ({year_id}) logged successfully.")
-#
-#             # Render a message confirming the request or redirect to another page
-#             return render_template('Roster.html', team_name=team_name, year_id=year_id)
-#
-#         finally:
-#             con.close()
-#
-#     else:
-#         flash("Please select both team and year.")
-#         return redirect(url_for('main.team_year'))
 
 @main.route('/get_years')
 def get_years():
