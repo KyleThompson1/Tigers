@@ -32,6 +32,18 @@
         <input type="submit" value="Play Immaculate Grid">
     </form>
 
+    <!-- View Profile Button -->
+    <form action="{{ url_for('main.view_profile') }}" method="GET" class="button-container"
+          style="margin-top: 10px;">
+        <input type="submit" value="View Profile">
+    </form>
+
+    <!-- Logout Button -->
+    <form action="{{ url_for('main.logout') }}" method="POST" class="button-container"
+          style="margin-top: 10px;">
+        <input type="submit" value="Logout">
+    </form>
+
 </div>
 </body>
 </html>
