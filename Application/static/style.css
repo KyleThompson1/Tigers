@@ -118,3 +118,191 @@ input[type="submit"]:hover {
         font-size: 14px;
     }
 }
+
+/* ------------------- Profile Page CSS ------------------- */
+/* Profile page specific styles */
+.profile-container {
+    background-color: #fff;
+    min-height: 450px;
+    max-width: 85%;
+    width: 650px;
+    padding: 50px;
+    border-radius: 25px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    margin-top: 30px;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.profile-header img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 15px;
+}
+
+.profile-header h1 {
+    font-size: 36px;
+    color: darkgreen;
+    margin: 0;
+}
+
+.profile-header p {
+    font-size: 18px;
+    margin-top: 5px;
+    color: #333;
+}
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.activity-card {
+    background: darkgreen;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    color: #fff;
+}
+
+.activity-card h3 {
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+.activity-card p {
+    font-size: 14px;
+    margin: 0;
+}
+
+.activity-card a {
+    text-decoration: none;
+    color: #fff;
+    background: #45a049;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.activity-card a:hover {
+    background: #3d8b3d;
+}
+
+.profile-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.profile-actions .btn {
+    background-color: darkgreen;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.profile-actions .btn:hover {
+    background-color: #45a049;
+}
+
+.preferences-btn {
+    background-color: darkgreen; /* Green background */
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+}
+
+.preferences-btn:hover {
+    background-color: #45a049; /* Lighter green on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-container {
+        width: 100%;
+        padding: 30px; /* Adjust padding for smaller screens */
+        box-sizing: border-box;
+    }
+
+    .activity-card {
+        padding: 12px; /* Adjust padding */
+    }
+
+    .activity-card h3 {
+        font-size: 18px;
+    }
+
+    .activity-card p {
+        font-size: 12px;
+    }
+}
+
+/* Style for profile picture options */
+.profile-pic-options {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap into rows */
+    gap: 15px; /* Add space between items */
+    justify-content: center; /* Center the items */
+}
+
+.profile-pic-options label {
+    display: block; /* Make the label a block element */
+    width: 100px; /* Set a fixed width for each option */
+    text-align: center; /* Center-align the content */
+}
+
+.profile-pic-options img {
+    width: 50px; /* Adjust the size of images */
+    height: auto;
+    margin-bottom: 5px; /* Add space between image and radio button */
+}
+
+/* Align the radio buttons below the image */
+.profile-pic-options input[type="radio"] {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Style for the roster requests */
+.roster-request-item {
+    padding: 5px;
+    margin: 5px 0;
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.roster-requests-list {
+    max-height: 200px; /* Limit the height of the list */
+    overflow-y: auto;  /* Enable vertical scrolling if content overflows */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9; /* Light background for the list */
+}
+
+/* Style for the scrollable dropdown */
+.roster-requests select {
+    width: 100%;
+    height: 150px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow-y: auto; /* Adds scroll when the list is long */
+}
+
+.roster-requests label {
+    font-weight: bold;
+}
+/* ------------------- Profile Page CSS ------------------- */
