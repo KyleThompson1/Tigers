@@ -313,6 +313,7 @@ def profile():
         con.close()
 
 
+
 # @main.route('/get_years')
 # def get_years():
 #     team_name = request.args.get('team_name')
@@ -426,6 +427,7 @@ def generate_roster():
                     b_R, 
                     b_RBI,
                     ROUND(((b_2B) + (2 * b_3B) + (3 * b_HR)) / b_AB, 3) AS ISO,
+                    (b_AB + b_BB + b_HBP + b_SH + b_SF) AS PA,
                     ROUND((b_H - b_HR)/(b_AB - b_SO - b_HR + b_SF), 3) AS BABIP,
                     ROUND((b_H/b_AB), 3) AS AVG,
                     ROUND((b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 3) AS OBP,
@@ -518,7 +520,7 @@ def generate_roster():
 #         return roster_requests
 #     finally:
 #         con.close()
-        
+
 @main.route('/admin/roster_requests', methods=['GET'])
 def view_roster_requests():
     if session.get('role') == 'admin':

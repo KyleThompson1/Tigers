@@ -46,6 +46,7 @@
                 <tr>
                     <th>Player</th>
                     <th>G</th>
+                    <th>PA</th>
                     <th>HR</th>
                     <th>SB</th>
                     <th>ISO</th>
@@ -65,6 +66,7 @@
                 <tr>
                     <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
                     <td>{{ player.b_G }}</td>
+                    <td>{{ player.PA }}</td>
                     <td>{{ player.b_HR }}</td>
                     <td>{{ player.b_SB }}</td>
                     <td>{{ player.ISO }}</td>
@@ -107,12 +109,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
-
-
-
-
-
 
         <!-- Try Again button redirects to the same page -->
         <form action="{{ url_for('main.team_year') }}" style="margin-top: 200px" method="GET">
