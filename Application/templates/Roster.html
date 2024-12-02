@@ -34,6 +34,15 @@
         h1, h2 {
             color: #333;
         }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        #load-more-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+        }
     </style>
 </head>
 <body>
@@ -81,8 +90,27 @@
                     <td>{{ player.b_RBI }}</td>
                 </tr>
                 {% endfor %}
+                <tr class="total-row">
+                    <td>Team Total</td>
+                    <td>{{ batting_leaders|sum(attribute='b_G') }}</td>
+                    <td>{{ batting_leaders|sum(attribute='PA') }}</td>
+                    <td>{{ batting_leaders|sum(attribute='b_HR') }}</td>
+                    <td>{{ batting_leaders|sum(attribute='b_SB') }}</td>
+                    <td>{{ (batting_leaders|sum(attribute='ISO') / batting_leaders|length)|round(3) }}</td>
+                    <td>{{ (batting_leaders|sum(attribute='BABIP') / batting_leaders|length)|round(3) }}</td>
+                    <td>{{ (batting_leaders|sum(attribute='AVG') / batting_leaders|length)|round(3) }}</td>
+                    <td>{{ (batting_leaders|sum(attribute='OBP') / batting_leaders|length)|round(3) }}</td>
+                    <td>{{ (batting_leaders|sum(attribute='SLG') / batting_leaders|length)|round(3) }}</td>
+                    <td>{{ (batting_leaders|sum(attribute='wOBA') / batting_leaders|length)|round(3) }}</td>
+                    <td>{{ batting_leaders|sum(attribute='b_AB') }}</td>
+                    <td>{{ batting_leaders|sum(attribute='b_H') }}</td>
+                    <td>{{ batting_leaders|sum(attribute='b_R') }}</td>
+                    <td>{{ batting_leaders|sum(attribute='b_RBI') }}</td>
+                </tr>
             </tbody>
         </table>
+
+        <button id="load-more-btn">Load More Players</button>
 
         <h2>Pitching Leaders</h2>
         <table>
