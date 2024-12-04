@@ -292,6 +292,27 @@ def query_player():
             FROM allstarfull a
             JOIN people p ON a.playerId = p.playerID
             WHERE a.teamId = %s
+        """,
+        'Played Outfield': """
+            SELECT DISTINCT p.nameFirst, p.nameLast
+            FROM fielding AS f
+            JOIN appearances AS a ON f.playerID = a.playerID
+            JOIN people AS p ON f.playerID = p.playerID
+            WHERE a.teamID = %s
+            AND (
+                f.position = 'LF' 
+                OR f.position = 'CF' 
+                OR f.position = 'RF'
+            )
+            AND f.f_G >= 1;
+        """,
+        '200+ Hits Season': """
+            SELECT DISTINCT p.nameFirst, p.nameLast 
+            FROM batting b
+            JOIN people p ON b.playerID = p.playerID
+            WHERE b.b_H >= 200 AND b.teamID = %s
+            GROUP BY b.playerID
+        
         """
         # Add more conditions here
     }
