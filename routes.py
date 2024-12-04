@@ -706,7 +706,7 @@ def player_profile():
                 playerData = cursor.fetchall()
 
                 # Render a message confirming the request or redirect to another page
-                return render_template('roster.html',
+                return render_template('Player.html',
                                        playerID=playerID,
                                        playerData=playerData)
 
