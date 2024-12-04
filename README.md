@@ -70,6 +70,7 @@ Follow these steps to launch the application:
 - **User Profile**: Users can view their profile page and see their full name, username, and request count.
 - **User Profile Roster Requests**: Users can view their own roster requests in the form of a scroll down menu.
 - **User Profile Pics**: Users can choose from 8 images for a profile picture to customize their Tiger DB experience.
+- **Player Search**: Users can search for a specific player, and see their stats throughout their career.
   
 ---
 
