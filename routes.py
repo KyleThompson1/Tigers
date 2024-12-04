@@ -261,6 +261,53 @@ def manage_user():
 
     return redirect(url_for('main.admin_page'))
 
+@main.route('/cross-team')
+def crossTeam():
+    return render_template('cross-team-query.html')
+
+@main.route('/cross-team-query', methods=['POST'])
+def crossPlayer():
+    team1 = request.form.get('team1')
+    team2 = request.form.get('team2')
+
+    try:
+        conn = pymysql.connect(
+            host=mysql["host"],
+            user=mysql["user"],
+            password=mysql["password"],
+            db=mysql["database"]
+        )
+        cursor = conn.cursor()
+
+        query = """
+            SELECT p.nameFirst, p.nameLast
+            FROM batting AS b
+            JOIN people AS p ON b.playerID = p.playerID
+            WHERE b.teamID IN (%s, %s)
+            GROUP BY b.playerID
+            HAVING COUNT(DISTINCT b.teamID) = 2;
+        """
+        # """
+        # SELECT p.nameFirst, p.nameLast
+        #     FROM batting AS b
+        #     JOIN people AS p ON b.playerID = p.playerID
+        #     WHERE b.teamID IN ('HOU', 'NYA')
+        #     GROUP BY b.playerID;
+        # """
+
+        cursor.execute(query, (team1, team2))
+        players = cursor.fetchall()
+
+        if not players:
+            return f"No players found."
+
+        return render_template('results.html', players=players, condition='', team='')
+    except pymysql.Error as e:
+        print(f"Database error: {e}")
+        flash(f"Database error: {e}")
+
+
+
 @main.route('/query', methods=['POST'])
 def query_player():
     team = request.form.get('team')
