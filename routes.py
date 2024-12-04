@@ -82,7 +82,7 @@ def play_grid():
     return render_template('Play-Immaculate-Grid.html')
 
 @main.route('/player_search')
-def home():
+def player_search():
     return render_template('Player_Search.html')
 
 @main.route('/roster_grid', methods=['GET', 'POST'])
@@ -596,7 +596,7 @@ def view_roster_requests():
 
 #GENERATE PLAYER PAGE#
 @main.route('/player_profile', methods=['GET'])
-def team_year():
+def player_profile():
     playerID = request.args.get('playerID')
 
     if playerID:
