@@ -49,11 +49,11 @@
     <div class="large-container">
         <h1>{{ team_name }} || {{ year }} Stats</h1>
 
-        <h2>Batting Leaders</h2>
+        <h2>Batting Stats</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Player</th>
+                    <th>Year</th>
                     <th>G</th>
                     <th>PA</th>
                     <th>HR</th>
@@ -71,9 +71,9 @@
                 </tr>
             </thead>
             <tbody>
-                {% for player in batting_leaders %}
+                {% for player in playerData %}
                 <tr>
-                    <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
+                    <td>{{ player.yearID }}</td>
                     <td>{{ player.b_G }}</td>
                     <td>{{ player.PA }}</td>
                     <td>{{ player.b_HR }}</td>
@@ -90,56 +90,8 @@
                     <td>{{ player.b_RBI }}</td>
                 </tr>
                 {% endfor %}
-{#                <tr class="total-row">#}
-{#                    <td>Team Total</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_G') }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='PA') }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_HR') }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_SB') }}</td>#}
-{#                    <td>{{ (batting_leaders|sum(attribute='ISO') / batting_leaders|length)|round(3) }}</td>#}
-{#                    <td>{{ (batting_leaders|sum(attribute='BABIP') / batting_leaders|length)|round(3) }}</td>#}
-{#                    <td>{{ (batting_leaders|sum(attribute='AVG') / batting_leaders|length)|round(3) }}</td>#}
-{#                    <td>{{ (batting_leaders|sum(attribute='OBP') / batting_leaders|length)|round(3) }}</td>#}
-{#                    <td>{{ (batting_leaders|sum(attribute='SLG') / batting_leaders|length)|round(3) }}</td>#}
-{#                    <td>{{ (batting_leaders|sum(attribute='wOBA') / batting_leaders|length)|round(3) }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_AB') }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_H') }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_R') }}</td>#}
-{#                    <td>{{ batting_leaders|sum(attribute='b_RBI') }}</td>#}
-{#                </tr>#}
             </tbody>
         </table>
-
-        <h2>Pitching Leaders</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th>G</th>
-                    <th>GS</th>
-                    <th>IP</th>
-                    <th>LOB%</th>
-                    <th>BB</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in pitching_leaders %}
-                <tr>
-                    <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
-                    <td>{{ player.p_G }}</td>
-                    <td>{{ player.p_GS }}</td>
-                    <td>{{ player.p_IPouts }}</td>
-                    <td>{{ player.LOB }}</td>
-                    <td>{{ player.p_BB }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <!-- Try Again button redirects to the same page -->
-        <form action="{{ url_for('main.team_year') }}" style="margin-top: 200px" method="GET">
-            <input type="submit" style="margin-top: 20px" value="Generate New Roster">
-        </form>
 
         <!-- Home button redirects to the homepage -->
         <form action="{{ url_for('main.roster_grid') }}" method="GET">

@@ -81,6 +81,9 @@ def register():
 def play_grid():
     return render_template('Play-Immaculate-Grid.html')
 
+@main.route('/player_search')
+def home():
+    return render_template('Player_Search.html')
 
 @main.route('/roster_grid', methods=['GET', 'POST'])
 def roster_grid():
@@ -590,3 +593,76 @@ def view_roster_requests():
 
     flash("You must be an admin to access this page.", "error")
     return redirect(url_for('main.home'))
+
+#GENERATE PLAYER PAGE#
+@main.route('/player_profile', methods=['GET'])
+def team_year():
+    playerID = request.args.get('playerID')
+
+    if playerID:
+        # Retrieve user_id from session
+        user_id = session.get('user_id')
+
+        # Log the request in the roster_requests table
+        con = pymysql.connect(
+            host=mysql["host"],
+            user=mysql["user"],
+            password=mysql["password"],
+            db=mysql["database"]
+        )
+
+        try:
+            cursor = con.cursor()
+
+            with con.cursor(pymysql.cursors.DictCursor) as cursor:
+                # Batting Leaders Query
+                player_sql = """
+                    SELECT 
+                        nameFirst,
+                        nameLast,
+                        batting.yearID,
+                        b_G,
+                        b_SB,
+                        b_AB, 
+                        b_H, 
+                        b_HR, 
+                        b_R, 
+                        b_RBI,
+                        ROUND(((b_2B) + (2 * b_3B) + (3 * b_HR)) / b_AB, 3) AS ISO,
+                        (b_AB + b_BB + b_HBP + b_SH + b_SF) AS PA,
+                        ROUND((b_H - b_HR)/(b_AB - b_SO - b_HR + b_SF), 3) AS BABIP,
+                        ROUND((b_H/b_AB), 3) AS AVG,
+                        ROUND((b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 3) AS OBP,
+                        ROUND(((b_H - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) * 1.0 / NULLIF(b_AB, 0), 3) AS SLG,
+                        ROUND(
+                        (
+                            (0.690 * (b_BB - b_IBB)) +
+                            (0.722 * b_HBP) +
+                            (0.888 * (b_H - b_2B - b_3B - b_HR)) +
+                            (1.271 * b_2B) +
+                            (1.616 * b_3B) +
+                            (2.101 * b_HR)
+                        ) * 1.0 / 
+                        NULLIF((b_AB + b_BB - b_IBB + b_SF + b_HBP), 0),4) AS wOBA
+                    FROM batting 
+                    JOIN people ON batting.playerID = people.playerID
+                    WHERE batting.playerID = %s
+                    ORDER BY yearID DESC
+                    LIMIT 10
+                    """
+
+                # Execute batting query
+                cursor.execute(player_sql, (playerID))
+                playerData = cursor.fetchall()
+
+                # Render a message confirming the request or redirect to another page
+                return render_template('roster.html',
+                                       playerID=playerID,
+                                       playerData=playerData)
+
+        finally:
+            con.close()
+
+    else:
+        flash("Enter player.")
+        return redirect(url_for('main'))

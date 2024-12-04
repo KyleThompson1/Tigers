@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Search</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Player Information</h1>
+    <form>
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Select Role:</label>
+            <select id="role" name="role" required>
+                <option value="">--Select--</option>
+                <option value="pitching">Pitching</option>
+                <option value="batting">Batting</option>
+            </select>
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
