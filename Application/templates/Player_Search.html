@@ -33,23 +33,22 @@
 <body>
 <div class="login-container">
     <h1 style="font-size: 48px;">Player Information</h1>
-    <form action="{{ url_for('main.generate_roster') }}" method="GET" class="button-container">
+    <form action="{{ url_for('main.player_list') }}" method="GET" class="button-container">
         <div class="form-group">
-            <label for="firstName" style="font-size: 1.5rem; margin-top: 20px">First Name:</label>
-            <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
+            <label for="nameFirst" style="font-size: 1.5rem; margin-top: 20px">First Name:</label>
+            <input type="text" id="nameFirst" name="nameFirst" placeholder="Enter your first name" required>
         </div>
         <div class="form-group">
-            <label for="lastName" style="font-size: 1.5rem; margin-top: 20px">Last Name:</label>
-            <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
+            <label for="nameLast" style="font-size: 1.5rem; margin-top: 20px">Last Name:</label>
+            <input type="text" id="nameLast" name="nameLast" placeholder="Enter your last name" required>
         </div>
-        <div class="form-group">
-            <label for="role" style="font-size: 1.5rem; margin-top: 20px">Select Role:</label>
-            <select id="role" name="role" required>
-                <option value="">--Select--</option>
-                <option value="pitching">Pitching</option>
-                <option value="batting">Batting</option>
-            </select>
-        </div>
+{#        <div class="form-group">#}
+{#            <label for="role" style="font-size: 1.5rem; margin-top: 20px">Select Role:</label>#}
+{#            <select id="role" name="role" required>#}
+{#                <option value="pitching">Pitching</option>#}
+{#                <option value="batting">Batting</option>#}
+{#            </select>#}
+{#        </div>#}
         <button type="submit">Submit</button>
     </form>
 </div>

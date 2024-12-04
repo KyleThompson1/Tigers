@@ -595,6 +595,56 @@ def view_roster_requests():
     return redirect(url_for('main.home'))
 
 #GENERATE PLAYER PAGE#
+@main.route('/player_list', methods=['GET'])
+def player_list():
+    nameFirst = request.args.get('nameFirst')
+    nameLast = request.args.get('nameLast')
+
+    if nameFirst and nameLast:
+        # Retrieve user_id from session
+        user_id = session.get('user_id')
+
+        # Log the request in the roster_requests table
+        con = pymysql.connect(
+            host=mysql["host"],
+            user=mysql["user"],
+            password=mysql["password"],
+            db=mysql["database"]
+        )
+
+        try:
+            cursor = con.cursor()
+
+            with con.cursor(pymysql.cursors.DictCursor) as cursor:
+                # Batting Leaders Query
+                player_sql = """
+                    SELECT 
+                        nameFirst,
+                        nameLast,
+                        playerID,
+                        birthYear,
+                        deathYear
+                    FROM people
+                    WHERE nameFirst = %s AND nameLast = %s
+                    """
+
+                # Execute batting query
+                cursor.execute(player_sql, (nameFirst, nameLast))
+                playerData = cursor.fetchall()
+
+                # Render a message confirming the request or redirect to another page
+                return render_template('Player_List.html',
+                                       nameFirst=nameFirst,
+                                       nameLast=nameLast,
+                                       playerData=playerData)
+
+        finally:
+            con.close()
+
+    else:
+        flash("Enter player.")
+        return redirect(url_for('main'))
+
 @main.route('/player_profile', methods=['GET'])
 def player_profile():
     playerID = request.args.get('playerID')

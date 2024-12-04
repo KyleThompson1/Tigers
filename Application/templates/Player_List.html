@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Players</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        #load-more-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="large-container">
+    <h1>Results for {{ nameFirst }} {{ nameLast }}</h1>
+
+    <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Birth Year</th>
+                    <th>Death Year</th>
+                    <th>ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in playerData %}
+                <tr>
+                    <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
+                    <td>{{ player.birthYear }}</td>
+                    <td>{{ player.deathYear }}</td>
+                    <td>{{ player.playerID }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+</div>
+</body>
+</html>
