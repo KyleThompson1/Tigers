@@ -10,7 +10,11 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
         }
         .form-group {
             margin-bottom: 15px;
@@ -27,18 +31,19 @@
     </style>
 </head>
 <body>
-    <h1>Player Information</h1>
-    <form>
+<div class="login-container">
+    <h1 style="font-size: 48px;">Player Information</h1>
+    <form action="{{ url_for('main.generate_roster') }}" method="GET" class="button-container">
         <div class="form-group">
-            <label for="firstName">First Name:</label>
+            <label for="firstName" style="font-size: 1.5rem; margin-top: 20px">First Name:</label>
             <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
         </div>
         <div class="form-group">
-            <label for="lastName">Last Name:</label>
+            <label for="lastName" style="font-size: 1.5rem; margin-top: 20px">Last Name:</label>
             <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
         </div>
         <div class="form-group">
-            <label for="role">Select Role:</label>
+            <label for="role" style="font-size: 1.5rem; margin-top: 20px">Select Role:</label>
             <select id="role" name="role" required>
                 <option value="">--Select--</option>
                 <option value="pitching">Pitching</option>
@@ -47,5 +52,6 @@
         </div>
         <button type="submit">Submit</button>
     </form>
+</div>
 </body>
 </html>
