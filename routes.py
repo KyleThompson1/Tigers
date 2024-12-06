@@ -729,14 +729,37 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-587')
+        response = requests.get('https://www.immaculategrid.com/grid-596')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
         y_axis = soup.find_all(class_=['flex items-center justify-center w-20 sm:w-36 md:w-48 h-24 sm:h-36 md:h-48'])
 
-        print(x_axis)
-        print(y_axis)
+        # print(x_axis)
+        # print(y_axis)
+
+        grid_schema = {
+            'x1': 'LOGO' if x_axis and x_axis[0].img and x_axis[0].img['alt'] else (
+                'TEXT' if x_axis and x_axis[0].div and x_axis[0].div.div and x_axis[
+                    0].div.div.div and x_axis[0].div.div.div.div and x_axis[0].div.div.div.div.div else 'Unknown X1'),
+            'x2': 'LOGO' if x_axis and x_axis[1].img and x_axis[1].img['alt'] else (
+                'TEXT' if x_axis and x_axis[1].div and x_axis[1].div.div and x_axis[
+                    1].div.div.div and x_axis[1].div.div.div.div and x_axis[1].div.div.div.div.div else 'Unknown X2'),
+            'x3': 'LOGO' if x_axis and x_axis[2].img and x_axis[2].img['alt'] else (
+                'TEXT' if x_axis and x_axis[2].div and x_axis[2].div.div and x_axis[
+                    2].div.div.div and x_axis[2].div.div.div.div and x_axis[2].div.div.div.div.div else 'Unknown X3'),
+            'y1': 'LOGO' if y_axis and y_axis[0].img and y_axis[0].img['alt'] else (
+                'TEXT' if y_axis and y_axis[0].div and y_axis[0].div.div and y_axis[
+                    0].div.div.div and y_axis[0].div.div.div.div and y_axis[0].div.div.div.div.div else 'Unknown Y1'),
+            'y2': 'LOGO' if y_axis and y_axis[1].img and y_axis[1].img['alt'] else (
+                'TEXT' if y_axis and y_axis[1].div and y_axis[1].div.div and y_axis[
+                    1].div.div.div and y_axis[1].div.div.div.div and y_axis[1].div.div.div.div.div else 'Unknown Y2'),
+            'y3': 'LOGO' if y_axis and y_axis[2].img and y_axis[2].img['alt'] else (
+                'TEXT' if y_axis and y_axis[2].div and y_axis[2].div.div and y_axis[
+                    2].div.div.div and y_axis[2].div.div.div.div and y_axis[2].div.div.div.div.div else 'Unknown Y3'),
+        }
+
+        # print('schema', grid_schema)
 
         # Placeholder for actual scraping logic
         grid_categories = {
@@ -759,14 +782,14 @@ def scrape_immaculate_grid():
                 y_axis[2].div.div.div.div.div.text if y_axis and y_axis[2].div and y_axis[2].div.div and y_axis[
                     2].div.div.div and y_axis[2].div.div.div.div and y_axis[2].div.div.div.div.div else 'Unknown Y3'),
         }
-        return grid_categories
+        return {'grid_categories': grid_categories, 'grid_schema': grid_schema}
 
     except requests.RequestException as e:
         print(f"Error scraping Immaculate Grid: {e}")
         return None
 
 
-def query_baseball_database(x_category, y_category):
+def query_baseball_database(grid, schema):
     """
     Query the baseball database to find players matching grid criteria.
 
@@ -776,19 +799,36 @@ def query_baseball_database(x_category, y_category):
     """
     try:
         # Connect to SQLite database
-        conn = sqlite3.connect('baseball_players.db')
+        conn = pymysql.connect(
+            host=mysql["host"],
+            user=mysql["user"],
+            password=mysql["password"],
+            db=mysql["database"]
+        )
         cursor = conn.cursor()
 
-        # Example query - you'll need to customize based on your database schema
-        query = """
-        SELECT player_name, team, position
-        FROM players
-        WHERE (? IN (category1, category2) OR ? IN (category1, category2))
-        """
+        print(grid)
+        print(schema)
 
-        cursor.execute(query, (x_category, y_category))
-        matching_players = cursor.fetchall()
+        if(schema.get('x1') == 'LOGO' and schema.get('y1') == 'LOGO'):
+            query = """
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                WHERE b.teamID IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
 
+            cursor.execute(query, (grid.get('x1'), grid.get('y1')))
+            players = cursor.fetchall()
+
+            print(players)
+
+        # cursor.execute(query, (x_category, y_category))
+        # matching_players = cursor.fetchall()
+
+        matching_players = players
         conn.close()
         return matching_players
 
@@ -811,11 +851,13 @@ def solve_grid():
             'status': 'failed'
         }), 500
 
-    # Query database for matching players
-    # matching_players = query_baseball_database(
-    #     grid_info['x1'],
-    #     grid_info['x2'],
-    # )
+    grid_categories = grid_info.get('grid_categories', {})
+    grid_schema = grid_info.get('grid_schema', {})
+
+    matching_players = query_baseball_database(
+        grid_categories,
+        grid_schema,
+    )
     matching_players = ''
     print('grid info', grid_info)
 

@@ -17,14 +17,15 @@
                 success: function(response) {
                     let resultsHtml = '<h2>Grid Categories:</h2>';
                     console.log(response);
-                    resultsHtml += `<p>x1: ${response.grid_categories.x1}</p>`;
-                    resultsHtml += `<p>x2: ${response.grid_categories.x2}</p>`;
-                    resultsHtml += `<p>x3: ${response.grid_categories.x3}</p>`;
-                    resultsHtml += `<p>y1: ${response.grid_categories.y1}</p>`;
-                    resultsHtml += `<p>y2: ${response.grid_categories.y2}</p>`;
-                    resultsHtml += `<p>y3: ${response.grid_categories.y3}</p>`;
+                    resultsHtml += `<p>x1: ${response.grid_categories.grid_categories.x1}</p>`;
+                    resultsHtml += `<p>x2: ${response.grid_categories.grid_categories.x2}</p>`;
+                    resultsHtml += `<p>x3: ${response.grid_categories.grid_categories.x3}</p>`;
+                    resultsHtml += `<p>y1: ${response.grid_categories.grid_categories.y1}</p>`;
+                    resultsHtml += `<p>y2: ${response.grid_categories.grid_categories.y2}</p>`;
+                    resultsHtml += `<p>y3: ${response.grid_categories.grid_categories.y3}</p>`;
 
                     resultsHtml += '<h2>Matching Players:</h2>';
+                    resultsHtml += '<p>${response.matching_players}</p>';
 <!--                    response.matching_players.forEach(player => {-->
 <!--                        resultsHtml += `<p>${player[0]} - ${player[1]} (${player[2]})</p>`;-->
 <!--                    });-->
