@@ -729,26 +729,36 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-590')
+        response = requests.get('https://www.immaculategrid.com/grid-587')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
+        y_axis = soup.find_all(class_=['flex items-center justify-center w-20 sm:w-36 md:w-48 h-24 sm:h-36 md:h-48'])
 
-        print(x_axis[0].img['alt'])
-        print(x_axis[1].img['alt'])
-        print(x_axis[2].div.div.div.div.div.text)
         print(x_axis)
+        print(y_axis)
 
         # Placeholder for actual scraping logic
         grid_categories = {
-            'x1': x_axis[0].img['alt'],
-            'x2': x_axis[1].img['alt'] ,
-            'x3': x_axis[2].div.div.div.div.div.text,
-            # 'stats2': soup.find(class_='px-4 h-12 sm:h-20 md:h-24 text-sm sm:text-xl md:text-2xl text-center text-gray-800 dark:text-white flex items-center font-display uppercase font-bold leading-tight').text.strip() if soup.find(class_='px-4 h-12 sm:h-20 md:h-24 text-sm sm:text-xl md:text-2xl text-center text-gray-800 dark:text-white flex items-center font-display uppercase font-bold leading-tight') else 'Unknown Stats2'
+            'x1': x_axis[0].img['alt'] if x_axis and x_axis[0].img and x_axis[0].img['alt'] else (
+                x_axis[0].div.div.div.div.div.text if x_axis and x_axis[0].div and x_axis[0].div.div and x_axis[
+                    0].div.div.div and x_axis[0].div.div.div.div and x_axis[0].div.div.div.div.div else 'Unknown X1'),
+            'x2': x_axis[1].img['alt'] if x_axis and x_axis[1].img and x_axis[1].img['alt'] else (
+                x_axis[1].div.div.div.div.div.text if x_axis and x_axis[1].div and x_axis[1].div.div and x_axis[
+                    1].div.div.div and x_axis[1].div.div.div.div and x_axis[1].div.div.div.div.div else 'Unknown X2'),
+            'x3': x_axis[2].img['alt'] if x_axis and x_axis[2].img and x_axis[2].img['alt'] else (
+                x_axis[2].div.div.div.div.div.text if x_axis and x_axis[2].div and x_axis[2].div.div and x_axis[
+                    2].div.div.div and x_axis[2].div.div.div.div and x_axis[2].div.div.div.div.div else 'Unknown X3'),
+            'y1': y_axis[0].img['alt'] if y_axis and y_axis[0].img and y_axis[0].img['alt'] else (
+                y_axis[0].div.div.div.div.div.text if y_axis and y_axis[0].div and y_axis[0].div.div and y_axis[
+                    0].div.div.div and y_axis[0].div.div.div.div and y_axis[0].div.div.div.div.div else 'Unknown Y1'),
+            'y2': y_axis[1].img['alt'] if y_axis and y_axis[1].img and y_axis[1].img['alt'] else (
+                y_axis[1].div.div.div.div.div.text if y_axis and y_axis[1].div and y_axis[1].div.div and y_axis[
+                    1].div.div.div and y_axis[1].div.div.div.div and y_axis[1].div.div.div.div.div else 'Unknown Y2'),
+            'y3': y_axis[2].img['alt'] if y_axis and y_axis[2].img and y_axis[2].img['alt'] else (
+                y_axis[2].div.div.div.div.div.text if y_axis and y_axis[2].div and y_axis[2].div.div and y_axis[
+                    2].div.div.div and y_axis[2].div.div.div.div and y_axis[2].div.div.div.div.div else 'Unknown Y3'),
         }
-        print(grid_categories)
-
-        # TODO: Extract actual grid cell details
         return grid_categories
 
     except requests.RequestException as e:
