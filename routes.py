@@ -1,8 +1,11 @@
-from flask import render_template, Blueprint, request, redirect, url_for, session, flash
+from flask import render_template, Blueprint, request, redirect, url_for, session, flash, jsonify
 import pymysql
 from sqlalchemy.sql.coercions import WhereHavingImpl
 from werkzeug.security import check_password_hash
 from csi3335f2024 import mysql
+import requests
+from bs4 import BeautifulSoup
+import sqlite3
 
 # Create a blueprint to organize routes
 main = Blueprint('main', __name__)
@@ -716,3 +719,101 @@ def player_profile():
     else:
         flash("Enter player.")
         return redirect(url_for('main'))
+
+
+def scrape_immaculate_grid():
+    """
+    Scrape the Immaculate Grid website to extract grid fields.
+    Note: You'll need to replace this with the actual scraping logic
+    based on the current website structure.
+    """
+    try:
+        # Example scraping (you'll need to adjust based on actual website)
+        response = requests.get('https://www.immaculategrid.com/grid-590')
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
+
+        print(x_axis[0].img['alt'])
+        print(x_axis[1].img['alt'])
+        print(x_axis[2].div.div.div.div.div.text)
+        print(x_axis)
+
+        # Placeholder for actual scraping logic
+        grid_categories = {
+            'x1': x_axis[0].img['alt'],
+            'x2': x_axis[1].img['alt'] ,
+            'x3': x_axis[2].div.div.div.div.div.text,
+            # 'stats2': soup.find(class_='px-4 h-12 sm:h-20 md:h-24 text-sm sm:text-xl md:text-2xl text-center text-gray-800 dark:text-white flex items-center font-display uppercase font-bold leading-tight').text.strip() if soup.find(class_='px-4 h-12 sm:h-20 md:h-24 text-sm sm:text-xl md:text-2xl text-center text-gray-800 dark:text-white flex items-center font-display uppercase font-bold leading-tight') else 'Unknown Stats2'
+        }
+        print(grid_categories)
+
+        # TODO: Extract actual grid cell details
+        return grid_categories
+
+    except requests.RequestException as e:
+        print(f"Error scraping Immaculate Grid: {e}")
+        return None
+
+
+def query_baseball_database(x_category, y_category):
+    """
+    Query the baseball database to find players matching grid criteria.
+
+    :param x_category: Category for x-axis
+    :param y_category: Category for y-axis
+    :return: List of matching players
+    """
+    try:
+        # Connect to SQLite database
+        conn = sqlite3.connect('baseball_players.db')
+        cursor = conn.cursor()
+
+        # Example query - you'll need to customize based on your database schema
+        query = """
+        SELECT player_name, team, position
+        FROM players
+        WHERE (? IN (category1, category2) OR ? IN (category1, category2))
+        """
+
+        cursor.execute(query, (x_category, y_category))
+        matching_players = cursor.fetchall()
+
+        conn.close()
+        return matching_players
+
+    except sqlite3.Error as e:
+        print(f"Database query error: {e}")
+        return []
+
+
+@main.route('/solve-grid', methods=['POST'])
+def solve_grid():
+    """
+    Endpoint to solve the Immaculate Grid
+    """
+    # Scrape the current grid
+    grid_info = scrape_immaculate_grid()
+
+    if not grid_info:
+        return jsonify({
+            'error': 'Could not retrieve grid information',
+            'status': 'failed'
+        }), 500
+
+    # Query database for matching players
+    # matching_players = query_baseball_database(
+    #     grid_info['x1'],
+    #     grid_info['x2'],
+    # )
+    matching_players = ''
+    print('grid info', grid_info)
+
+    return jsonify({
+        'grid_categories': grid_info,
+        'matching_players': matching_players
+    })
+
+@main.route('/new-solver', methods=['GET'])
+def scraper():
+    return render_template('scraper.html')

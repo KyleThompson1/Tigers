@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Immaculate Grid Solver</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Immaculate Grid Solver</h1>
+    <button id="solve-grid">Solve Grid</button>
+    <div id="results"></div>
+
+    <script>
+        $('#solve-grid').click(function() {
+            $.ajax({
+                url: '/solve-grid',
+                type: 'POST',
+                success: function(response) {
+                    let resultsHtml = '<h2>Grid Categories:</h2>';
+                    resultsHtml += `<p>X-Axis: ${response.grid_categories.x1}</p>`;
+                    resultsHtml += `<p>Y-Axis: ${response.grid_categories.x2}</p>`;
+                    resultsHtml += `<p>Stats: ${response.grid_categories.x3}</p>`;
+<!--                    resultsHtml += `<p>Stats: ${response.grid_categories.stats2}</p>`;-->
+
+                    resultsHtml += '<h2>Matching Players:</h2>';
+                    response.matching_players.forEach(player => {
+                        resultsHtml += `<p>${player[0]} - ${player[1]} (${player[2]})</p>`;
+                    });
+
+                    $('#results').html(resultsHtml);
+                },
+                error: function(xhr) {
+                    $('#results').html(`<p>Error: ${xhr.responseJSON.error}</p>`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
