@@ -11,7 +11,7 @@ import sqlite3
 main = Blueprint('main', __name__)
 
 CONDITIONS_MAP = {
-        "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
+        ".300+\xa0AVG CareerBatting": "AVG(b.b_H / b.b_AB) >= 0.300",
         "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
         "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
         "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
@@ -42,7 +42,7 @@ CONDITIONS_MAP = {
         "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
         "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
         "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
-        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
+        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'DH' AND f.playerID = b.playerID)",
         "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
         "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
         "Hall of Fame": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
@@ -50,13 +50,14 @@ CONDITIONS_MAP = {
         "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
         "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
         "Played Catchermin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'C' AND f.playerID = b.playerID)",
-        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
-        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
-        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
+        "Played Center\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'CF' AND f.playerID = b.playerID)",
+        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '1B' AND f.playerID = b.playerID)",
+        "Played Third\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '3B' AND f.playerID = b.playerID)",
+        "Rookie of the Year": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
         "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
         "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "Played Right\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'RF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
-        "6+ WAR Season": "SUM(b.b_AB) > 0 AND(((SUM(b.b_H) + SUM(b.b_BB) - IFNULL(SUM(b.b_CS), 0) + IFNULL(SUM(b.b_HBP), 0)) * ((SUM(b.b_H) + SUM(b.b_2B) + (2 * IFNULL(SUM(b.b_3B), 0)) + (3 * IFNULL(SUM(b.b_HR), 0))) + (0.26 * (SUM(b.b_BB) - IFNULL(SUM(b.b_IBB), 0) + IFNULL(SUM(b.b_HBP), 0))) + (0.52 * (IFNULL(SUM(b.b_SH), 0) + IFNULL(SUM(b.b_SF), 0) + IFNULL(SUM(b.b_SB), 0))))) / (SUM(b.b_AB) + SUM(b.b_BB) + IFNULL(SUM(b.b_HBP), 0) + IFNULL(SUM(b.b_SH), 0) + IFNULL(SUM(b.b_SF), 0))) / 10 >= 6",
+        "6+ WAR Season": "SUM((((b.b_H + b.b_BB - IFNULL(b.b_CS, 0) + IFNULL(b.b_HBP, 0)) * ((b.b_H - b.b_2B - b.b_3B - b.b_HR) + (2 * b.b_2B) + (3 * b.b_3B) + (4 * b.b_HR) +  (0.26 * (b.b_BB - IFNULL(b.b_IBB, 0) + IFNULL(b.b_HBP, 0))) + (0.52 * (IFNULL(b.b_SH, 0) + IFNULL(b.b_SF, 0) + IFNULL(b.b_SB, 0)))))/ (b.b_AB + b.b_BB + IFNULL(b.b_HBP, 0) + IFNULL(b.b_SH, 0) + IFNULL(b.b_SF, 0)))) / 10 >= 6",
         "Silver Slugger": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Silver Slugger' AND a.playerID = b.playerID)",
         "Played Shortstopmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'SS' AND f.f_g > 0 AND b.playerID = f.playerID)",
         "Played Outfieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE (f.position = 'CF' OR f.position = 'LF' OR f.position = 'RF')  AND f.f_G >= 1 AND f.playerID = b.playerID)"
@@ -188,7 +189,7 @@ teams_map = {
         "Texas Rangers": "TEX",
         "Toledo Blue Stockings": "TL1",
         "Toledo Maumees": "TL2",
-        "Toronto Blue Jays": "TOR",
+        "Toronto  Blue Jays": "TOR",
         "Troy Haymakers": "TRO",
         "Troy Trojans": "TRN",
         "Washington Nationals": "WAS",
@@ -919,7 +920,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-597')
+        response = requests.get('https://www.immaculategrid.com/grid-140')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
