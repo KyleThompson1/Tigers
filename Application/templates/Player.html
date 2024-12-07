@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roster</title>
+    <title>Player Page</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='Images/icons8-tiger-white-100.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/style.css">
-    <title>{{ team_name }} {{ year }} Roster</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,7 +46,9 @@
 </head>
 <body>
     <div class="large-container">
-        <h1>Stats</h1>
+        {% for player in nameData %}
+            <h1>{{ player.nameFirst }} {{ player.nameLast }} Stats</h1>
+        {% endfor %}
 
         <h2>Batting Stats</h2>
         <table>
@@ -71,7 +72,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for player in playerData %}
+                {% for player in battingData %}
                 <tr>
                     <td>{{ player.yearID }}</td>
                     <td>{{ player.b_G }}</td>
@@ -90,6 +91,38 @@
                     <td>{{ player.b_RBI }}</td>
                 </tr>
                 {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Pitching Stats</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>G</th>
+                    <th>GS</th>
+                    <th>IP</th>
+                    <th>LOB%</th>
+                    <th>BB</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pitchingData %}
+                    {% for player in pitchingData %}
+                    <tr>
+                        <td>{{ player.yearID }}</td>
+                        <td>{{ player.p_G }}</td>
+                        <td>{{ player.p_GS }}</td>
+                        <td>{{ player.p_IPouts }}</td>
+                        <td>{{ player.LOB }}</td>
+                        <td>{{ player.p_BB }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">No pitching data available</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
 
