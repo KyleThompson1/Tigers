@@ -729,7 +729,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-596')
+        response = requests.get('https://www.immaculategrid.com/grid-608')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
@@ -797,6 +797,191 @@ def query_baseball_database(grid, schema):
     :param y_category: Category for y-axis
     :return: List of matching players
     """
+
+    teams_map = {
+        "Anaheim Angels": "ANA",
+        "Altoona Mountain City": "ALT",
+        "Arizona Diamondbacks": "ARI",
+        "Atlanta Braves": "ATL",
+        "Baltimore Orioles": "BAL",
+        "Baltimore Canaries": "BL1",
+        "Baltimore Marylands": "BL4",
+        "Baltimore Terrapins": "BLF",
+        "Baltimore Monumentals": "BLU",
+        "Boston Americans": "BOS",
+        "Boston Red Sox": "BOS",
+        "Boston Red Stockings": "BS1",
+        "Boston Beaneaters": "BSN",
+        "Boston Bees": "BSN",
+        "Boston Braves": "BSN",
+        "Boston Doves": "BSN",
+        "Boston Red Caps": "BSN",
+        "Boston Rustlers": "BSN",
+        "Boston Reds": "BSU",
+        "Brooklyn Eckfords": "BR1",
+        "Brooklyn Atlantics": "BR3",
+        "Brooklyn Gladiators": "BR4",
+        "Brooklyn Tip-Tops": "BRF",
+        "Brooklyn Bridegrooms": "BRO",
+        "Brooklyn Dodgers": "BRO",
+        "Brooklyn Grooms": "BRO",
+        "Brooklyn Robins": "BRO",
+        "Brooklyn Superbas": "BRO",
+        "Brooklyn Ward's Wonders": "BRP",
+        "Buffalo Blues": "BUF",
+        "Buffalo Buffeds": "BUF",
+        "Buffalo Bisons": "BFN",
+        "California Angels": "CAL",
+        "Chicago Chi-Feds": "CHF",
+        "Chicago Whales": "CHF",
+        "Chicago White Sox": "CHA",
+        "Chicago Colts": "CHN",
+        "Chicago Cubs": "CHN",
+        "Chicago Orphans": "CHN",
+        "Chicago White Stockings": "CHN",
+        "Chicago Pirates": "CHP",
+        "Cincinnati Red Stockings": "CIN",
+        "Cincinnati Redlegs": "CIN",
+        "Cincinnati Reds": "CIN",
+        "Cincinnati Outlaw Reds": "CNU",
+        "Cleveland Blues": "CLE",
+        "Cleveland Bronchos": "CLE",
+        "Cleveland Guardians": "CLE",
+        "Cleveland Indians": "CLE",
+        "Cleveland Naps": "CLE",
+        "Cleveland Spiders": "CLE",
+        "Cleveland Forest Citys": "CL1",
+        "Cleveland Spiders": "CL4",
+        "Columbus Buckeyes": "CL5",
+        "Columbus Solons": "CL6",
+        "Cleveland Infants": "CLP",
+        "Colorado Rockies": "COL",
+        "Detroit Tigers": "DET",
+        "Detroit Wolverines": "DTN",
+        "Elizabeth Resolutes": "ELI",
+        "Florida Marlins": "FLO",
+        "Fort Wayne Kekiongas": "FW1",
+        "Houston Astros": "HOU",
+        "Houston Colt .45’s": "HOU",
+        "Hartford Dark Blues": "HR1",
+        "Indianapolis Blues": "IN1",
+        "Indianapolis Hoosiers": "IN3",
+        "Kansas City Royals": "KCA",
+        "Kansas City Athletics": "KC1",
+        "Kansas City Cowboys": "KC2",
+        "Kansas City Packers": "KCF",
+        "Keokuk Westerns": "KEO",
+        "Los Angeles Dodgers": "LAN",
+        "Los Angeles Angels": "LAA",
+        "Louisville Grays": "LS1",
+        "Louisville Colonels": "LS2",
+        "Louisville Eclipse": "LS2",
+        "Milwaukee Brewers": "MIL",
+        "Milwaukee Braves": "ML1",
+        "Milwaukee Grays": "ML2",
+        "Minnesota Twins": "MIN",
+        "Middletown Mansfields": "MID",
+        "Montreal Expos": "MON",
+        "Newark Pepper": "NEW",
+        "New Haven Elm Citys": "NH1",
+        "New York Giants": "NY1",
+        "New York Gothams": "NY1",
+        "New York Mutuals": "NY2",
+        "New York Metropolitans": "NY4",
+        "New York Highlanders": "NYA",
+        "New York Yankees": "NYA",
+        "New York Mets": "NYN",
+        "Oakland Athletics": "OAK",
+        "Philadelphia Athletics": "PHA",
+        "Philadelphia Whites": "PH2",
+        "Philadelphia Centennials": "PH3",
+        "Philadelphia Blue Jays": "PHI",
+        "Philadelphia Phillies": "PHI",
+        "Philadelphia Quakers": "PHI",
+        "Philadelphia Keystones": "PHU",
+        "Pittsburg Alleghenys": "PIT",
+        "Pittsburgh Rebels": "PTF",
+        "Pittsburgh Burghers": "PTP",
+        "Providence Grays": "PRO",
+        "Rockford Forest Citys": "RC1",
+        "Rochester Broncos": "RC2",
+        "Richmond Virginians": "RIC",
+        "San Diego Padres": "SDN",
+        "San Francisco Giants": "SFN",
+        "St. Louis Red Stockings": "SL1",
+        "St. Louis Brown Stockings": "SL2",
+        "St. Louis Maroons": "SL5",
+        "St. Louis Cardinals": "SLN",
+        "St. Louis Perfectos": "SLN",
+        "St. Louis Browns": "SLA",
+        "St. Louis Terriers": "SLF",
+        "St. Paul White Caps": "SPU",
+        "Syracuse Stars": "SR1",
+        "Tampa Bay Devil Rays": "TBA",
+        "Tampa Bay Rays": "TBA",
+        "Toledo Blue Stockings": "TL1",
+        "Toledo Maumees": "TL2",
+        "Toronto Blue Jays": "TOR",
+        "Troy Haymakers": "TRO",
+        "Troy Trojans": "TRN",
+        "Washington Nationals": "WAS",
+        "Wilmington Quicksteps": "WIL",
+        "Worcester Ruby Legs": "WOR",
+        "Washington Senators": "WS1",
+        "Washington Olympics": "WS3",
+        "Washington Blue Legs": "WS5",
+        "Washington Statesmen": "WS9"
+    }
+
+    CONDITIONS_MAP = {
+        "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
+        "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
+        "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
+        "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
+        "10+ HR SEASON": "b.b_HR >= 10",
+        "10+ WIN SEASON": "p.W >= 10",
+        "100+ RBI SEASON": "b.b_RBI >= 100",
+        "100+ RUN SEASON": "b.b_R >= 100",
+        "20+ WIN SEASON": "p.W >= 20",
+        "200+ HITS SEASON": "b.b_H >= 200",
+        "200+ K SEASON": "p.SO >= 200",
+        "200+ WINS CAREER": "SUM(p.W) >= 200",
+        "2000+ K CAREER": "SUM(p.SO) >= 2000",
+        "2000+\xa0Hits CareerBatting": "SUM(b.b_H) >= 2000",
+        "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
+        "30+ HR SEASON": "b.b_HR >= 30",
+        "30+ SB SEASON": "b.b_SB >= 30",
+        "30+ SAVE SEASON": "p.SV >= 30",
+        "300+ HR CAREER": "SUM(b.b_HR) >= 300",
+        "300+ SAVE CAREER": "SUM(p.SV) >= 300",
+        "300+ WINS CAREER": "SUM(p.W) >= 300",
+        "3000+ K CAREER": "SUM(p.SO) >= 3000",
+        "3000+ HITS CAREER": "SUM(b.b_H) >= 3000",
+        "40+ 2B SEASON": "b.b_2B >= 40",
+        "40+ HR SEASON": "b.b_HR >= 40",
+        "40+ SAVE SEASON": "p.SV >= 40",
+        "40+ WAR CAREER": "SUM(b.WAR) >= 40",
+        "500+ HR CAREER": "SUM(b.b_HR) >= 500",
+        "6+ WAR SEASON": "b.WAR >= 6",
+        "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
+        "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
+        "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
+        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
+        "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
+        "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
+        "HALL OF FAME": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
+        "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'MVP' AND a.playerID = b.playerID)",
+        "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
+        "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
+        "PLAYED CATCHER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'C' AND f.playerID = b.playerID)",
+        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
+        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
+        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
+        "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
+        "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'LF' AND f.G >= 1 AND f.playerID = b.playerID)",
+    }
+
+
     try:
         # Connect to SQLite database
         conn = pymysql.connect(
@@ -819,22 +1004,105 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
+            team1 = teams_map.get(grid.get('x1'))
+            team2 = teams_map.get(grid.get('y1'))
 
-            cursor.execute(query, (grid.get('x1'), grid.get('y1')))
+            cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
 
             print(players)
+        elif(schema.get('x1') == 'TEXT' and schema.get('y1') == 'TEXT'):
+            conditions = [grid.get('x1'), grid.get('y1')]
 
-        # cursor.execute(query, (x_category, y_category))
+            query = generate_query(conditions)
+            # print(query)
+            #
+            # team1 = teams_map.get(grid.get('x1'))
+            # team2 = teams_map.get(grid.get('y1'))
+            cursor.execute(query)
+            players = cursor.fetchall()
+
+            # cursor.execute(query, (x_category, y_category))
         # matching_players = cursor.fetchall()
 
         matching_players = players
         conn.close()
-        return matching_players
+        return players
 
     except sqlite3.Error as e:
         print(f"Database query error: {e}")
         return []
+
+
+def generate_query(conditions):
+
+    CONDITIONS_MAP = {
+        "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
+        "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
+        "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
+        "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
+        "10+ HR SEASON": "b.b_HR >= 10",
+        "10+ WIN SEASON": "p.W >= 10",
+        "100+ RBI SEASON": "b.b_RBI >= 100",
+        "100+ RUN SEASON": "b.b_R >= 100",
+        "20+ WIN SEASON": "p.W >= 20",
+        "200+ HITS SEASON": "b.b_H >= 200",
+        "200+ K SEASON": "p.SO >= 200",
+        "200+ WINS CAREER": "SUM(p.W) >= 200",
+        "2000+ K CAREER": "SUM(p.SO) >= 2000",
+        "2000+\xa0Hits CareerBatting": "SUM(b.b_H) >= 2000",
+        "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
+        "30+ HR SEASON": "b.b_HR >= 30",
+        "30+ SB SEASON": "b.b_SB >= 30",
+        "30+ SAVE SEASON": "p.SV >= 30",
+        "300+ HR CAREER": "SUM(b.b_HR) >= 300",
+        "300+ SAVE CAREER": "SUM(p.SV) >= 300",
+        "300+ WINS CAREER": "SUM(p.W) >= 300",
+        "3000+ K CAREER": "SUM(p.SO) >= 3000",
+        "3000+ HITS CAREER": "SUM(b.b_H) >= 3000",
+        "40+ 2B SEASON": "b.b_2B >= 40",
+        "40+ HR SEASON": "b.b_HR >= 40",
+        "40+ SAVE SEASON": "p.SV >= 40",
+        "40+ WAR CAREER": "SUM(b.WAR) >= 40",
+        "500+ HR CAREER": "SUM(b.b_HR) >= 500",
+        "6+ WAR SEASON": "b.WAR >= 6",
+        "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
+        "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
+        "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
+        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
+        "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
+        "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
+        "HALL OF FAME": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
+        "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'MVP' AND a.playerID = b.playerID)",
+        "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
+        "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
+        "PLAYED CATCHER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'C' AND f.playerID = b.playerID)",
+        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
+        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
+        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
+        "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
+        "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
+
+    }
+    base_query = """
+    SELECT DISTINCT p.nameFirst, p.nameLast
+    FROM batting b
+    JOIN people p ON b.playerID = p.playerID
+    LEFT JOIN pitching pit ON pit.playerID = b.playerID 
+    GROUP BY b.playerID
+    HAVING {conditions}
+    """
+    condition_clauses = []
+
+    for condition in conditions:
+        if condition in CONDITIONS_MAP:
+            print('condition', condition)
+            condition_clauses.append(CONDITIONS_MAP[condition])
+        else:
+            raise ValueError(f"Unknown condition: {condition}")
+
+    where_clause = " AND ".join(condition_clauses)
+    return base_query.format(conditions=where_clause)
 
 
 @main.route('/solve-grid', methods=['POST'])
@@ -858,7 +1126,6 @@ def solve_grid():
         grid_categories,
         grid_schema,
     )
-    matching_players = ''
     print('grid info', grid_info)
 
     return jsonify({
