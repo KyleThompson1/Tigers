@@ -72,25 +72,31 @@
                 </tr>
             </thead>
             <tbody>
+                {% if battingData %}
                 {% for player in battingData %}
-                <tr>
-                    <td>{{ player.yearID }}</td>
-                    <td>{{ player.b_G }}</td>
-                    <td>{{ player.PA }}</td>
-                    <td>{{ player.b_HR }}</td>
-                    <td>{{ player.b_SB }}</td>
-                    <td>{{ player.ISO }}</td>
-                    <td>{{ player.BABIP }}</td>
-                    <td>{{ player.AVG }}</td>
-                    <td>{{ player.OBP }}</td>
-                    <td>{{ player.SLG }}</td>
-                    <td>{{ player.wOBA }}</td>
-                    <td>{{ player.b_AB }}</td>
-                    <td>{{ player.b_H }}</td>
-                    <td>{{ player.b_R }}</td>
-                    <td>{{ player.b_RBI }}</td>
-                </tr>
-                {% endfor %}
+                    <tr>
+                        <td>{{ player.yearID }}</td>
+                        <td>{{ player.b_G }}</td>
+                        <td>{{ player.PA }}</td>
+                        <td>{{ player.b_HR }}</td>
+                        <td>{{ player.b_SB }}</td>
+                        <td>{{ player.ISO }}</td>
+                        <td>{{ player.BABIP }}</td>
+                        <td>{{ player.AVG }}</td>
+                        <td>{{ player.OBP }}</td>
+                        <td>{{ player.SLG }}</td>
+                        <td>{{ player.wOBA }}</td>
+                        <td>{{ player.b_AB }}</td>
+                        <td>{{ player.b_H }}</td>
+                        <td>{{ player.b_R }}</td>
+                        <td>{{ player.b_RBI }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6">No batting data available</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
 
@@ -102,6 +108,10 @@
                     <th>G</th>
                     <th>GS</th>
                     <th>IP</th>
+                    <th>K%</th>
+                    <th>BB%</th>
+                    <th>HR/9</th>
+                    <th>BABIP</th>
                     <th>LOB%</th>
                     <th>BB</th>
                 </tr>
@@ -114,6 +124,10 @@
                         <td>{{ player.p_G }}</td>
                         <td>{{ player.p_GS }}</td>
                         <td>{{ player.p_IPouts }}</td>
+                        <td>{{ player.KPercentage }}</td>
+                        <td>{{ player.BBPercentage }}</td>
+                        <td>{{ player.HR9 }}</td>
+                        <td>{{ player.BABIP }}</td>
                         <td>{{ player.LOB }}</td>
                         <td>{{ player.p_BB }}</td>
                     </tr>

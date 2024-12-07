@@ -466,6 +466,10 @@ def generate_roster():
                     p_G,
                     p_GS,
                     p_IPouts,
+                    ROUND(CAST(p_SO AS FLOAT) / p_BFP * 100, 2) AS KPercentage,
+                    ROUND(CAST(p_BB AS FLOAT) / p_BFP * 100, 2) AS BBPercentage,
+                    ROUND(CAST(p_HR AS FLOAT) * 27 / (p_IPOuts / 3), 2) AS HR9,
+                    ROUND(CAST(p_H - p_HR AS FLOAT) / (p_BFP - p_SO - p_BB - p_HR - p_SF), 3) AS BABIP,
                     ROUND((p_H + p_BB + p_HBP - p_R)/(p_H + p_BB + p_HBP - (1.4 * p_HR)), 3) AS LOB,
                     p_BB
                 FROM pitching 
@@ -707,10 +711,14 @@ def player_profile():
                        nameLast, 
                        p_G,
                        p_GS,
-                       p_IPouts,
-                       ROUND((p_H + p_BB + p_HBP - p_R)/(p_H + p_BB + p_HBP - (1.4 * p_HR)), 3) AS LOB,
-                       p_BB,
-                       yearID
+                        p_IPouts,
+                        ROUND(CAST(p_SO AS FLOAT) / p_BFP * 100, 2) AS KPercentage,
+                        ROUND(CAST(p_BB AS FLOAT) / p_BFP * 100, 2) AS BBPercentage,
+                        ROUND(CAST(p_HR AS FLOAT) * 27 / (p_IPOuts / 3), 2) AS HR9,
+                        ROUND(CAST(p_H - p_HR AS FLOAT) / (p_BFP - p_SO - p_BB - p_HR - p_SF), 3) AS BABIP,
+                        ROUND((p_H + p_BB + p_HBP - p_R)/(p_H + p_BB + p_HBP - (1.4 * p_HR)), 3) AS LOB,
+                        p_BB,
+                        yearID
                    FROM pitching 
                    JOIN people ON pitching.playerID = people.playerID
                    WHERE pitching.playerID = %s
