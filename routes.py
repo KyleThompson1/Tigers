@@ -10,6 +10,190 @@ import sqlite3
 # Create a blueprint to organize routes
 main = Blueprint('main', __name__)
 
+CONDITIONS_MAP = {
+        "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
+        "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
+        "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
+        "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
+        "10+ HR SEASON": "b.b_HR >= 10",
+        "10+ WIN SEASON": "p.W >= 10",
+        "100+ RBI SEASON": "b.b_RBI >= 100",
+        "100+ RUN SEASON": "b.b_R >= 100",
+        "20+ WIN SEASON": "p.W >= 20",
+        "200+ HITS SEASON": "b.b_H >= 200",
+        "200+ K SEASON": "p.SO >= 200",
+        "200+ WINS CAREER": "SUM(p.W) >= 200",
+        "2000+ K CAREER": "SUM(p.SO) >= 2000",
+        "2000+\xa0Hits CareerBatting": "SUM(b.b_H) >= 2000",
+        "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
+        "30+ HR Season": "b.b_HR >= 30",
+        "30+ SB Season": "SUM(b.b_SB) >= 30",
+        "30+ SAVE Season": "p.SV >= 30",
+        "300+ HR CAREER": "SUM(b.b_HR) >= 300",
+        "300+ SAVE CAREER": "SUM(p.SV) >= 300",
+        "300+ WINS CAREER": "SUM(p.W) >= 300",
+        "3000+ K CAREER": "SUM(p.SO) >= 3000",
+        "3000+ HITS CAREER": "SUM(b.b_H) >= 3000",
+        "40+ 2B SEASON": "b.b_2B >= 40",
+        "40+ HR SEASON": "b.b_HR >= 40",
+        "40+ SAVE SEASON": "p.SV >= 40",
+        "40+ WAR CAREER": "SUM(b.WAR) >= 40",
+        "500+ HR CAREER": "SUM(b.b_HR) >= 500",
+        "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
+        "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
+        "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
+        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
+        "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
+        "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
+        "HALL OF FAME": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
+        "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Most Valuable Player' AND a.playerID = b.playerID)",
+        "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
+        "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
+        "PLAYED CATCHER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'C' AND f.playerID = b.playerID)",
+        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
+        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
+        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
+        "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
+        "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
+        "Played Right\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'RF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
+        "6+ WAR Season": "SUM(b.b_AB) > 0 AND(((SUM(b.b_H) + SUM(b.b_BB) - IFNULL(SUM(b.b_CS), 0) + IFNULL(SUM(b.b_HBP), 0)) * ((SUM(b.b_H) + SUM(b.b_2B) + (2 * IFNULL(SUM(b.b_3B), 0)) + (3 * IFNULL(SUM(b.b_HR), 0))) + (0.26 * (SUM(b.b_BB) - IFNULL(SUM(b.b_IBB), 0) + IFNULL(SUM(b.b_HBP), 0))) + (0.52 * (IFNULL(SUM(b.b_SH), 0) + IFNULL(SUM(b.b_SF), 0) + IFNULL(SUM(b.b_SB), 0))))) / (SUM(b.b_AB) + SUM(b.b_BB) + IFNULL(SUM(b.b_HBP), 0) + IFNULL(SUM(b.b_SH), 0) + IFNULL(SUM(b.b_SF), 0))) / 10 >= 6",
+    }
+
+teams_map = {
+        "Anaheim Angels": "ANA",
+        "Altoona Mountain City": "ALT",
+        "Arizona Diamondbacks": "ARI",
+        "Atlanta Braves": "ATL",
+        "Baltimore Orioles": "BAL",
+        "Baltimore Canaries": "BL1",
+        "Baltimore Marylands": "BL4",
+        "Baltimore Terrapins": "BLF",
+        "Baltimore Monumentals": "BLU",
+        "Boston Americans": "BOS",
+        "Boston Red Sox": "BOS",
+        "Boston Red Stockings": "BS1",
+        "Boston Beaneaters": "BSN",
+        "Boston Bees": "BSN",
+        "Boston Braves": "BSN",
+        "Boston Doves": "BSN",
+        "Boston Red Caps": "BSN",
+        "Boston Rustlers": "BSN",
+        "Boston Reds": "BSU",
+        "Brooklyn Eckfords": "BR1",
+        "Brooklyn Atlantics": "BR3",
+        "Brooklyn Gladiators": "BR4",
+        "Brooklyn Tip-Tops": "BRF",
+        "Brooklyn Bridegrooms": "BRO",
+        "Brooklyn Dodgers": "BRO",
+        "Brooklyn Grooms": "BRO",
+        "Brooklyn Robins": "BRO",
+        "Brooklyn Superbas": "BRO",
+        "Brooklyn Ward's Wonders": "BRP",
+        "Buffalo Blues": "BUF",
+        "Buffalo Buffeds": "BUF",
+        "Buffalo Bisons": "BFN",
+        "California Angels": "CAL",
+        "Chicago Chi-Feds": "CHF",
+        "Chicago Whales": "CHF",
+        "Chicago White Sox": "CHA",
+        "Chicago Colts": "CHN",
+        "Chicago Cubs": "CHN",
+        "Chicago Orphans": "CHN",
+        "Chicago White Stockings": "CHN",
+        "Chicago Pirates": "CHP",
+        "Cincinnati Red Stockings": "CIN",
+        "Cincinnati Redlegs": "CIN",
+        "Cincinnati Reds": "CIN",
+        "Cincinnati Outlaw Reds": "CNU",
+        "Cleveland Blues": "CLE",
+        "Cleveland Bronchos": "CLE",
+        "Cleveland Guardians": "CLE",
+        "Cleveland Indians": "CLE",
+        "Cleveland Naps": "CLE",
+        "Cleveland Spiders": "CLE",
+        "Cleveland Forest Citys": "CL1",
+        "Cleveland Spiders": "CL4",
+        "Columbus Buckeyes": "CL5",
+        "Columbus Solons": "CL6",
+        "Cleveland Infants": "CLP",
+        "Colorado Rockies": "COL",
+        "Detroit Tigers": "DET",
+        "Detroit Wolverines": "DTN",
+        "Elizabeth Resolutes": "ELI",
+        "Florida Marlins": "FLO",
+        "Fort Wayne Kekiongas": "FW1",
+        "Houston Astros": "HOU",
+        "Houston Colt .45’s": "HOU",
+        "Hartford Dark Blues": "HR1",
+        "Indianapolis Blues": "IN1",
+        "Indianapolis Hoosiers": "IN3",
+        "Kansas City Royals": "KCA",
+        "Kansas City Athletics": "KC1",
+        "Kansas City Cowboys": "KC2",
+        "Kansas City Packers": "KCF",
+        "Keokuk Westerns": "KEO",
+        "Los Angeles Dodgers": "LAN",
+        "Los Angeles Angels": "LAA",
+        "Louisville Grays": "LS1",
+        "Louisville Colonels": "LS2",
+        "Louisville Eclipse": "LS2",
+        "Milwaukee Brewers": "MIL",
+        "Milwaukee Braves": "ML1",
+        "Milwaukee Grays": "ML2",
+        "Minnesota Twins": "MIN",
+        "Middletown Mansfields": "MID",
+        "Montreal Expos": "MON",
+        "Newark Pepper": "NEW",
+        "New Haven Elm Citys": "NH1",
+        "New York Giants": "NY1",
+        "New York Gothams": "NY1",
+        "New York Mutuals": "NY2",
+        "New York Metropolitans": "NY4",
+        "New York Highlanders": "NYA",
+        "New York Yankees": "NYA",
+        "New York Mets": "NYN",
+        "Oakland Athletics": "OAK",
+        "Philadelphia Athletics": "PHA",
+        "Philadelphia Whites": "PH2",
+        "Philadelphia Centennials": "PH3",
+        "Philadelphia Blue Jays": "PHI",
+        "Philadelphia Phillies": "PHI",
+        "Philadelphia Quakers": "PHI",
+        "Philadelphia Keystones": "PHU",
+        "Pittsburg Alleghenys": "PIT",
+        "Pittsburgh Rebels": "PTF",
+        "Pittsburgh Burghers": "PTP",
+        "Providence Grays": "PRO",
+        "Rockford Forest Citys": "RC1",
+        "Rochester Broncos": "RC2",
+        "Richmond Virginians": "RIC",
+        "San Diego Padres": "SDN",
+        "San Francisco Giants": "SFN",
+        "St. Louis Red Stockings": "SL1",
+        "St. Louis Brown Stockings": "SL2",
+        "St. Louis Maroons": "SL5",
+        "St. Louis Cardinals": "SLN",
+        "St. Louis Perfectos": "SLN",
+        "St. Louis Browns": "SLA",
+        "St. Louis Terriers": "SLF",
+        "St. Paul White Caps": "SPU",
+        "Syracuse Stars": "SR1",
+        "Tampa Bay Devil Rays": "TBA",
+        "Tampa Bay Rays": "TBA",
+        "Toledo Blue Stockings": "TL1",
+        "Toledo Maumees": "TL2",
+        "Toronto Blue Jays": "TOR",
+        "Troy Haymakers": "TRO",
+        "Troy Trojans": "TRN",
+        "Washington Nationals": "WAS",
+        "Wilmington Quicksteps": "WIL",
+        "Worcester Ruby Legs": "WOR",
+        "Washington Senators": "WS1",
+        "Washington Olympics": "WS3",
+        "Washington Blue Legs": "WS5",
+        "Washington Statesmen": "WS9"
+    }
+
 @main.route('/')
 def home():
     return render_template('Home.html')
@@ -735,9 +919,6 @@ def scrape_immaculate_grid():
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
         y_axis = soup.find_all(class_=['flex items-center justify-center w-20 sm:w-36 md:w-48 h-24 sm:h-36 md:h-48'])
 
-        # print(x_axis)
-        # print(y_axis)
-
         grid_schema = {
             'x1': 'LOGO' if x_axis and x_axis[0].img and x_axis[0].img['alt'] else (
                 'TEXT' if x_axis and x_axis[0].div and x_axis[0].div.div and x_axis[
@@ -759,9 +940,6 @@ def scrape_immaculate_grid():
                     2].div.div.div and y_axis[2].div.div.div.div and y_axis[2].div.div.div.div.div else 'Unknown Y3'),
         }
 
-        # print('schema', grid_schema)
-
-        # Placeholder for actual scraping logic
         grid_categories = {
             'x1': x_axis[0].img['alt'] if x_axis and x_axis[0].img and x_axis[0].img['alt'] else (
                 x_axis[0].div.div.div.div.div.text if x_axis and x_axis[0].div and x_axis[0].div.div and x_axis[
@@ -798,190 +976,6 @@ def query_baseball_database(grid, schema):
     :return: List of matching players
     """
 
-    teams_map = {
-        "Anaheim Angels": "ANA",
-        "Altoona Mountain City": "ALT",
-        "Arizona Diamondbacks": "ARI",
-        "Atlanta Braves": "ATL",
-        "Baltimore Orioles": "BAL",
-        "Baltimore Canaries": "BL1",
-        "Baltimore Marylands": "BL4",
-        "Baltimore Terrapins": "BLF",
-        "Baltimore Monumentals": "BLU",
-        "Boston Americans": "BOS",
-        "Boston Red Sox": "BOS",
-        "Boston Red Stockings": "BS1",
-        "Boston Beaneaters": "BSN",
-        "Boston Bees": "BSN",
-        "Boston Braves": "BSN",
-        "Boston Doves": "BSN",
-        "Boston Red Caps": "BSN",
-        "Boston Rustlers": "BSN",
-        "Boston Reds": "BSU",
-        "Brooklyn Eckfords": "BR1",
-        "Brooklyn Atlantics": "BR3",
-        "Brooklyn Gladiators": "BR4",
-        "Brooklyn Tip-Tops": "BRF",
-        "Brooklyn Bridegrooms": "BRO",
-        "Brooklyn Dodgers": "BRO",
-        "Brooklyn Grooms": "BRO",
-        "Brooklyn Robins": "BRO",
-        "Brooklyn Superbas": "BRO",
-        "Brooklyn Ward's Wonders": "BRP",
-        "Buffalo Blues": "BUF",
-        "Buffalo Buffeds": "BUF",
-        "Buffalo Bisons": "BFN",
-        "California Angels": "CAL",
-        "Chicago Chi-Feds": "CHF",
-        "Chicago Whales": "CHF",
-        "Chicago White Sox": "CHA",
-        "Chicago Colts": "CHN",
-        "Chicago Cubs": "CHN",
-        "Chicago Orphans": "CHN",
-        "Chicago White Stockings": "CHN",
-        "Chicago Pirates": "CHP",
-        "Cincinnati Red Stockings": "CIN",
-        "Cincinnati Redlegs": "CIN",
-        "Cincinnati Reds": "CIN",
-        "Cincinnati Outlaw Reds": "CNU",
-        "Cleveland Blues": "CLE",
-        "Cleveland Bronchos": "CLE",
-        "Cleveland Guardians": "CLE",
-        "Cleveland Indians": "CLE",
-        "Cleveland Naps": "CLE",
-        "Cleveland Spiders": "CLE",
-        "Cleveland Forest Citys": "CL1",
-        "Cleveland Spiders": "CL4",
-        "Columbus Buckeyes": "CL5",
-        "Columbus Solons": "CL6",
-        "Cleveland Infants": "CLP",
-        "Colorado Rockies": "COL",
-        "Detroit Tigers": "DET",
-        "Detroit Wolverines": "DTN",
-        "Elizabeth Resolutes": "ELI",
-        "Florida Marlins": "FLO",
-        "Fort Wayne Kekiongas": "FW1",
-        "Houston Astros": "HOU",
-        "Houston Colt .45’s": "HOU",
-        "Hartford Dark Blues": "HR1",
-        "Indianapolis Blues": "IN1",
-        "Indianapolis Hoosiers": "IN3",
-        "Kansas City Royals": "KCA",
-        "Kansas City Athletics": "KC1",
-        "Kansas City Cowboys": "KC2",
-        "Kansas City Packers": "KCF",
-        "Keokuk Westerns": "KEO",
-        "Los Angeles Dodgers": "LAN",
-        "Los Angeles Angels": "LAA",
-        "Louisville Grays": "LS1",
-        "Louisville Colonels": "LS2",
-        "Louisville Eclipse": "LS2",
-        "Milwaukee Brewers": "MIL",
-        "Milwaukee Braves": "ML1",
-        "Milwaukee Grays": "ML2",
-        "Minnesota Twins": "MIN",
-        "Middletown Mansfields": "MID",
-        "Montreal Expos": "MON",
-        "Newark Pepper": "NEW",
-        "New Haven Elm Citys": "NH1",
-        "New York Giants": "NY1",
-        "New York Gothams": "NY1",
-        "New York Mutuals": "NY2",
-        "New York Metropolitans": "NY4",
-        "New York Highlanders": "NYA",
-        "New York Yankees": "NYA",
-        "New York Mets": "NYN",
-        "Oakland Athletics": "OAK",
-        "Philadelphia Athletics": "PHA",
-        "Philadelphia Whites": "PH2",
-        "Philadelphia Centennials": "PH3",
-        "Philadelphia Blue Jays": "PHI",
-        "Philadelphia Phillies": "PHI",
-        "Philadelphia Quakers": "PHI",
-        "Philadelphia Keystones": "PHU",
-        "Pittsburg Alleghenys": "PIT",
-        "Pittsburgh Rebels": "PTF",
-        "Pittsburgh Burghers": "PTP",
-        "Providence Grays": "PRO",
-        "Rockford Forest Citys": "RC1",
-        "Rochester Broncos": "RC2",
-        "Richmond Virginians": "RIC",
-        "San Diego Padres": "SDN",
-        "San Francisco Giants": "SFN",
-        "St. Louis Red Stockings": "SL1",
-        "St. Louis Brown Stockings": "SL2",
-        "St. Louis Maroons": "SL5",
-        "St. Louis Cardinals": "SLN",
-        "St. Louis Perfectos": "SLN",
-        "St. Louis Browns": "SLA",
-        "St. Louis Terriers": "SLF",
-        "St. Paul White Caps": "SPU",
-        "Syracuse Stars": "SR1",
-        "Tampa Bay Devil Rays": "TBA",
-        "Tampa Bay Rays": "TBA",
-        "Toledo Blue Stockings": "TL1",
-        "Toledo Maumees": "TL2",
-        "Toronto Blue Jays": "TOR",
-        "Troy Haymakers": "TRO",
-        "Troy Trojans": "TRN",
-        "Washington Nationals": "WAS",
-        "Wilmington Quicksteps": "WIL",
-        "Worcester Ruby Legs": "WOR",
-        "Washington Senators": "WS1",
-        "Washington Olympics": "WS3",
-        "Washington Blue Legs": "WS5",
-        "Washington Statesmen": "WS9"
-    }
-
-    CONDITIONS_MAP = {
-        "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
-        "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
-        "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
-        "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
-        "10+ HR SEASON": "b.b_HR >= 10",
-        "10+ WIN SEASON": "p.W >= 10",
-        "100+ RBI SEASON": "b.b_RBI >= 100",
-        "100+ RUN SEASON": "b.b_R >= 100",
-        "20+ WIN SEASON": "p.W >= 20",
-        "200+ HITS SEASON": "b.b_H >= 200",
-        "200+ K SEASON": "p.SO >= 200",
-        "200+ WINS CAREER": "SUM(p.W) >= 200",
-        "2000+ K CAREER": "SUM(p.SO) >= 2000",
-        "2000+\xa0Hits CareerBatting": "SUM(b.b_H) >= 2000",
-        "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
-        "30+ HR SEASON": "b.b_HR >= 30",
-        "30+ SB SEASON": "b.b_SB >= 30",
-        "30+ SAVE SEASON": "p.SV >= 30",
-        "300+ HR CAREER": "SUM(b.b_HR) >= 300",
-        "300+ SAVE CAREER": "SUM(p.SV) >= 300",
-        "300+ WINS CAREER": "SUM(p.W) >= 300",
-        "3000+ K CAREER": "SUM(p.SO) >= 3000",
-        "3000+ HITS CAREER": "SUM(b.b_H) >= 3000",
-        "40+ 2B SEASON": "b.b_2B >= 40",
-        "40+ HR SEASON": "b.b_HR >= 40",
-        "40+ SAVE SEASON": "p.SV >= 40",
-        "40+ WAR CAREER": "SUM(b.WAR) >= 40",
-        "500+ HR CAREER": "SUM(b.b_HR) >= 500",
-        "6+ WAR SEASON": "b.WAR >= 6",
-        "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
-        "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
-        "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
-        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
-        "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
-        "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
-        "HALL OF FAME": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
-        "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'MVP' AND a.playerID = b.playerID)",
-        "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
-        "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
-        "PLAYED CATCHER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'C' AND f.playerID = b.playerID)",
-        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
-        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
-        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
-        "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
-        "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'LF' AND f.G >= 1 AND f.playerID = b.playerID)",
-    }
-
-
     try:
         # Connect to SQLite database
         conn = pymysql.connect(
@@ -994,6 +988,17 @@ def query_baseball_database(grid, schema):
 
         print(grid)
         print(schema)
+        x1y1Answer = ''
+        x1y2Answer = ''
+        x1y3Answer = ''
+        x2y1Answer = ''
+        x2y2Answer = ''
+        x2y3Answer = ''
+        x3y1Answer = ''
+        x3y2Answer = ''
+        x3y3Answer = ''
+
+        # -------------------------------------x1,y1---------------------------------------------
 
         if(schema.get('x1') == 'LOGO' and schema.get('y1') == 'LOGO'):
             query = """
@@ -1010,80 +1015,372 @@ def query_baseball_database(grid, schema):
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
 
+            x1y1Answer = players[0]
+
             print(players)
         elif(schema.get('x1') == 'TEXT' and schema.get('y1') == 'TEXT'):
             conditions = [grid.get('x1'), grid.get('y1')]
 
             query = generate_query(conditions)
-            # print(query)
-            #
-            # team1 = teams_map.get(grid.get('x1'))
-            # team2 = teams_map.get(grid.get('y1'))
             cursor.execute(query)
             players = cursor.fetchall()
+            x1y1Answer = players
+        else:
+            if schema.get('x1') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y1'))
+                condition = CONDITIONS_MAP.get(grid.get('x1'))
+                players = find_players_with_condition_and_team(team, condition)
+                x1y1Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x1'))
+                condition = CONDITIONS_MAP.get(grid.get('y1'))
+                players = find_players_with_condition_and_team(team, condition)
+                x1y1Answer = players[0]
 
-            # cursor.execute(query, (x_category, y_category))
-        # matching_players = cursor.fetchall()
+        players = ''
 
-        matching_players = players
+        # -------------------------------------x1,y2---------------------------------------------
+        if (schema.get('x1') == 'LOGO' and schema.get('y2') == 'LOGO'):
+            query = """
+                        SELECT p.nameFirst, p.nameLast
+                        FROM batting AS b
+                        JOIN people AS p ON b.playerID = p.playerID
+                        WHERE b.teamID IN (%s, %s)
+                        GROUP BY b.playerID
+                        HAVING COUNT(DISTINCT b.teamID) = 2;
+                    """;
+            team1 = teams_map.get(grid.get('x1'))
+            team2 = teams_map.get(grid.get('y2'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x1y2Answer = players[0]
+            print(players)
+        elif (schema.get('x1') == 'TEXT' and schema.get('y2') == 'TEXT'):
+            conditions = [grid.get('x1'), grid.get('y2')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x1y2Answer = players
+        else:
+            if schema.get('x1') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y2'))
+                condition = CONDITIONS_MAP.get(grid.get('x1'))
+                players = find_players_with_condition_and_team(team, condition)
+                x1y2Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x1'))
+                condition = CONDITIONS_MAP.get(grid.get('y2'))
+                players = find_players_with_condition_and_team(team, condition)
+                x1y2Answer = players[0]
+
+        players = ''
+        # -------------------------------------x1,y3---------------------------------------------
+        if (schema.get('x1') == 'LOGO' and schema.get('y3') == 'LOGO'):
+            query = """
+                        SELECT p.nameFirst, p.nameLast
+                        FROM batting AS b
+                        JOIN people AS p ON b.playerID = p.playerID
+                        WHERE b.teamID IN (%s, %s)
+                        GROUP BY b.playerID
+                        HAVING COUNT(DISTINCT b.teamID) = 2;
+                    """;
+            team1 = teams_map.get(grid.get('x1'))
+            team2 = teams_map.get(grid.get('y3'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x1y3Answer = players[0]
+            print(players)
+        elif (schema.get('x1') == 'TEXT' and schema.get('y3') == 'TEXT'):
+            conditions = [grid.get('x1'), grid.get('y3')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x1y3Answer = players
+        else:
+            if schema.get('x1') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y3'))
+                condition = CONDITIONS_MAP.get(grid.get('x1'))
+                players = find_players_with_condition_and_team(team, condition)
+                x1y3Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x1'))
+                condition = CONDITIONS_MAP.get(grid.get('y3'))
+                players = find_players_with_condition_and_team(team, condition)
+                x1y3Answer = players[0]
+
+        players = ''
+        # -------------------------------------x2,y1---------------------------------------------
+        if (schema.get('x2') == 'LOGO' and schema.get('y1') == 'LOGO'):
+            query = """
+                        SELECT p.nameFirst, p.nameLast
+                        FROM batting AS b
+                        JOIN people AS p ON b.playerID = p.playerID
+                        WHERE b.teamID IN (%s, %s)
+                        GROUP BY b.playerID
+                        HAVING COUNT(DISTINCT b.teamID) = 2;
+                    """;
+            team1 = teams_map.get(grid.get('x2'))
+            team2 = teams_map.get(grid.get('y1'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x2y1Answer = players[0]
+            print(players)
+        elif (schema.get('x2') == 'TEXT' and schema.get('y1') == 'TEXT'):
+            conditions = [grid.get('x2'), grid.get('y1')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x2y1Answer = players
+        else:
+            if schema.get('x2') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y1'))
+                condition = CONDITIONS_MAP.get(grid.get('x2'))
+                players = find_players_with_condition_and_team(team, condition)
+                x2y1Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x2'))
+                condition = CONDITIONS_MAP.get(grid.get('y1'))
+                players = find_players_with_condition_and_team(team, condition)
+                x2y1Answer = players[0]
+
+        players = ''
+        # -------------------------------------x2,y2---------------------------------------------
+        if (schema.get('x2') == 'LOGO' and schema.get('y2') == 'LOGO'):
+            query = """
+                        SELECT p.nameFirst, p.nameLast
+                        FROM batting AS b
+                        JOIN people AS p ON b.playerID = p.playerID
+                        WHERE b.teamID IN (%s, %s)
+                        GROUP BY b.playerID
+                        HAVING COUNT(DISTINCT b.teamID) = 2;
+                    """;
+            team1 = teams_map.get(grid.get('x2'))
+            team2 = teams_map.get(grid.get('y2'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x2y2Answer = players
+            print(players)
+        elif (schema.get('x2') == 'TEXT' and schema.get('y2') == 'TEXT'):
+            conditions = [grid.get('x2'), grid.get('y2')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x2y2Answer = players
+        else:
+            if schema.get('x2') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y2'))
+                condition = CONDITIONS_MAP.get(grid.get('x2'))
+                players = find_players_with_condition_and_team(team, condition)
+                x2y2Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x2'))
+                condition = CONDITIONS_MAP.get(grid.get('y2'))
+                players = find_players_with_condition_and_team(team, condition)
+                x2y2Answer = players[0]
+
+        players = ''
+        # -------------------------------------x2,y3---------------------------------------------
+        if (schema.get('x2') == 'LOGO' and schema.get('y3') == 'LOGO'):
+            query = """
+                                SELECT p.nameFirst, p.nameLast
+                                FROM batting AS b
+                                JOIN people AS p ON b.playerID = p.playerID
+                                WHERE b.teamID IN (%s, %s)
+                                GROUP BY b.playerID
+                                HAVING COUNT(DISTINCT b.teamID) = 2;
+                            """;
+            team1 = teams_map.get(grid.get('x2'))
+            team2 = teams_map.get(grid.get('y3'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x2y3Answer = players[0]
+            print(players)
+        elif (schema.get('x2') == 'TEXT' and schema.get('y3') == 'TEXT'):
+            conditions = [grid.get('x2'), grid.get('y3')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x2y3Answer = players
+        else:
+            if schema.get('x2') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y3'))
+                condition = CONDITIONS_MAP.get(grid.get('x2'))
+                players = find_players_with_condition_and_team(team, condition)
+                x2y3Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x2'))
+                condition = CONDITIONS_MAP.get(grid.get('y3'))
+                players = find_players_with_condition_and_team(team, condition)
+                x2y3Answer = players[0]
+
+        players = ''
+        # -------------------------------------x3,y1---------------------------------------------
+        if (schema.get('x3') == 'LOGO' and schema.get('y1') == 'LOGO'):
+            query = """
+                                SELECT p.nameFirst, p.nameLast
+                                FROM batting AS b
+                                JOIN people AS p ON b.playerID = p.playerID
+                                WHERE b.teamID IN (%s, %s)
+                                GROUP BY b.playerID
+                                HAVING COUNT(DISTINCT b.teamID) = 2;
+                            """;
+            team1 = teams_map.get(grid.get('x3'))
+            team2 = teams_map.get(grid.get('y1'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x3y1Answer = players[0]
+            print(players)
+        elif (schema.get('x3') == 'TEXT' and schema.get('y1') == 'TEXT'):
+            conditions = [grid.get('x3'), grid.get('y1')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x3y1Answer = players
+        else:
+            if schema.get('x3') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y1'))
+                condition = CONDITIONS_MAP.get(grid.get('x3'))
+                players = find_players_with_condition_and_team(team, condition)
+                x3y1Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x3'))
+                condition = CONDITIONS_MAP.get(grid.get('y1'))
+                players = find_players_with_condition_and_team(team, condition)
+                x3y1Answer = players[0]
+
+        players = ''
+        # -------------------------------------x3,y2---------------------------------------------
+        if (schema.get('x3') == 'LOGO' and schema.get('y2') == 'LOGO'):
+            query = """
+                                SELECT p.nameFirst, p.nameLast
+                                FROM batting AS b
+                                JOIN people AS p ON b.playerID = p.playerID
+                                WHERE b.teamID IN (%s, %s)
+                                GROUP BY b.playerID
+                                HAVING COUNT(DISTINCT b.teamID) = 2;
+                            """;
+            team1 = teams_map.get(grid.get('x3'))
+            team2 = teams_map.get(grid.get('y2'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x3y2Answer = players[0]
+            print(players)
+        elif (schema.get('x3') == 'TEXT' and schema.get('y2') == 'TEXT'):
+            conditions = [grid.get('x3'), grid.get('y2')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x3y2Answer = players
+        else:
+            if schema.get('x3') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y2'))
+                condition = CONDITIONS_MAP.get(grid.get('x3'))
+                players = find_players_with_condition_and_team(team, condition)
+                x3y2Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x3'))
+                condition = CONDITIONS_MAP.get(grid.get('y2'))
+                players = find_players_with_condition_and_team(team, condition)
+                x3y2Answer = players[0]
+
+        players = ''
+        # -------------------------------------x3,y3---------------------------------------------
+        if (schema.get('x3') == 'LOGO' and schema.get('y3') == 'LOGO'):
+            query = """
+                                SELECT p.nameFirst, p.nameLast
+                                FROM batting AS b
+                                JOIN people AS p ON b.playerID = p.playerID
+                                WHERE b.teamID IN (%s, %s)
+                                GROUP BY b.playerID
+                                HAVING COUNT(DISTINCT b.teamID) = 2;
+                            """;
+            team1 = teams_map.get(grid.get('x3'))
+            team2 = teams_map.get(grid.get('y3'))
+            cursor.execute(query, (team1, team2))
+            players = cursor.fetchall()
+            x3y3Answer = players[0]
+            print(players)
+        elif (schema.get('x3') == 'TEXT' and schema.get('y3') == 'TEXT'):
+            conditions = [grid.get('x3'), grid.get('y3')]
+            query = generate_query(conditions)
+            cursor.execute(query)
+            players = cursor.fetchall()
+            x3y3Answer = players
+        else:
+            if schema.get('x3') == 'TEXT':
+                # y1 is logo
+                team = teams_map.get(grid.get('y3'))
+                condition = CONDITIONS_MAP.get(grid.get('x3'))
+                players = find_players_with_condition_and_team(team, condition)
+                x3y3Answer = players[0]
+            else:
+                # x1 is a logo
+                team = teams_map.get(grid.get('x3'))
+                condition = CONDITIONS_MAP.get(grid.get('y3'))
+                players = find_players_with_condition_and_team(team, condition)
+                x3y3Answer = players[0]
+
+
+        answers = {'x1y1': x1y1Answer, 'x2y1': x2y1Answer, 'x3y1': x3y1Answer,
+                   'x1y2': x1y2Answer, 'x2y2': x2y2Answer, 'x3y2': x3y2Answer,
+                   'x1y3': x1y3Answer, 'x2y3': x2y3Answer, 'x3y3': x3y3Answer
+        }
         conn.close()
-        return players
+        return answers
 
     except sqlite3.Error as e:
         print(f"Database query error: {e}")
         return []
 
 
+def find_players_with_condition_and_team(team_id, condition):
+
+    if condition not in CONDITIONS_MAP:
+        raise ValueError(f"Condition '{condition}' is not supported.")
+
+    # SQL query
+    query = f"""
+    SELECT DISTINCT p.nameFirst, p.nameLast
+    FROM batting b
+    JOIN people p ON b.playerID = p.playerID
+    WHERE b.teamID = %s
+    GROUP BY b.playerID
+    HAVING {CONDITIONS_MAP[condition]};
+    """
+
+    # Connect to the database (adjust the path to your database file)
+    conn = sqlite3.connect("baseball.db")
+    cursor = conn.cursor()
+
+    try:
+        # Execute query
+        cursor.execute(query, (team_id,))
+        results = cursor.fetchall()
+
+        conn.close()
+        # Return results
+        return results
+    except sqlite3.Error as e:
+        conn.close()
+        raise e
+
 def generate_query(conditions):
-
-    CONDITIONS_MAP = {
-        "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
-        "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
-        "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
-        "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
-        "10+ HR SEASON": "b.b_HR >= 10",
-        "10+ WIN SEASON": "p.W >= 10",
-        "100+ RBI SEASON": "b.b_RBI >= 100",
-        "100+ RUN SEASON": "b.b_R >= 100",
-        "20+ WIN SEASON": "p.W >= 20",
-        "200+ HITS SEASON": "b.b_H >= 200",
-        "200+ K SEASON": "p.SO >= 200",
-        "200+ WINS CAREER": "SUM(p.W) >= 200",
-        "2000+ K CAREER": "SUM(p.SO) >= 2000",
-        "2000+\xa0Hits CareerBatting": "SUM(b.b_H) >= 2000",
-        "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
-        "30+ HR SEASON": "b.b_HR >= 30",
-        "30+ SB SEASON": "b.b_SB >= 30",
-        "30+ SAVE SEASON": "p.SV >= 30",
-        "300+ HR CAREER": "SUM(b.b_HR) >= 300",
-        "300+ SAVE CAREER": "SUM(p.SV) >= 300",
-        "300+ WINS CAREER": "SUM(p.W) >= 300",
-        "3000+ K CAREER": "SUM(p.SO) >= 3000",
-        "3000+ HITS CAREER": "SUM(b.b_H) >= 3000",
-        "40+ 2B SEASON": "b.b_2B >= 40",
-        "40+ HR SEASON": "b.b_HR >= 40",
-        "40+ SAVE SEASON": "p.SV >= 40",
-        "40+ WAR CAREER": "SUM(b.WAR) >= 40",
-        "500+ HR CAREER": "SUM(b.b_HR) >= 500",
-        "6+ WAR SEASON": "b.WAR >= 6",
-        "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
-        "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
-        "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
-        "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
-        "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
-        "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
-        "HALL OF FAME": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
-        "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'MVP' AND a.playerID = b.playerID)",
-        "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
-        "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
-        "PLAYED CATCHER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'C' AND f.playerID = b.playerID)",
-        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
-        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
-        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
-        "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
-        "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
-
-    }
     base_query = """
     SELECT DISTINCT p.nameFirst, p.nameLast
     FROM batting b
