@@ -20,7 +20,7 @@ CONDITIONS_MAP = {
         "100+ RBI SEASON": "b.b_RBI >= 100",
         "100+ RUN SEASON": "b.b_R >= 100",
         "20+ WIN SEASON": "p.W >= 20",
-        "200+ HITS SEASON": "b.b_H >= 200",
+        "200+ Hits SeasonBatting": "SUM(b.b_H) >= 200",
         "200+ K SEASON": "p.SO >= 200",
         "200+ WINS CAREER": "SUM(p.W) >= 200",
         "2000+ K CAREER": "SUM(p.SO) >= 2000",
@@ -29,7 +29,7 @@ CONDITIONS_MAP = {
         "30+ HR Season": "b.b_HR >= 30",
         "30+ SB Season": "SUM(b.b_SB) >= 30",
         "30+ SAVE Season": "p.SV >= 30",
-        "300+ HR CAREER": "SUM(b.b_HR) >= 300",
+        "300+ HR CareerBatting": "SUM(b.b_HR) >= 300",
         "300+ SAVE CAREER": "SUM(p.SV) >= 300",
         "300+ WINS CAREER": "SUM(p.W) >= 300",
         "3000+ K CAREER": "SUM(p.SO) >= 3000",
@@ -45,11 +45,11 @@ CONDITIONS_MAP = {
         "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
         "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
         "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
-        "HALL OF FAME": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
+        "Hall of Fame": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
         "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Most Valuable Player' AND a.playerID = b.playerID)",
         "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
         "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
-        "PLAYED CATCHER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'C' AND f.playerID = b.playerID)",
+        "Played Catchermin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'C' AND f.playerID = b.playerID)",
         "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
         "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
         "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
@@ -57,6 +57,9 @@ CONDITIONS_MAP = {
         "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "Played Right\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'RF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "6+ WAR Season": "SUM(b.b_AB) > 0 AND(((SUM(b.b_H) + SUM(b.b_BB) - IFNULL(SUM(b.b_CS), 0) + IFNULL(SUM(b.b_HBP), 0)) * ((SUM(b.b_H) + SUM(b.b_2B) + (2 * IFNULL(SUM(b.b_3B), 0)) + (3 * IFNULL(SUM(b.b_HR), 0))) + (0.26 * (SUM(b.b_BB) - IFNULL(SUM(b.b_IBB), 0) + IFNULL(SUM(b.b_HBP), 0))) + (0.52 * (IFNULL(SUM(b.b_SH), 0) + IFNULL(SUM(b.b_SF), 0) + IFNULL(SUM(b.b_SB), 0))))) / (SUM(b.b_AB) + SUM(b.b_BB) + IFNULL(SUM(b.b_HBP), 0) + IFNULL(SUM(b.b_SH), 0) + IFNULL(SUM(b.b_SF), 0))) / 10 >= 6",
+        "Silver Slugger": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Silver Slugger' AND a.playerID = b.playerID)",
+        "Played Shortstopmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'SS' AND f.f_g > 0 AND b.playerID = f.playerID)",
+        "Played Outfieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE (f.position = 'CF' OR f.position = 'LF' OR f.position = 'RF')  AND f.f_G >= 1 AND f.playerID = b.playerID)"
     }
 
 teams_map = {
@@ -70,7 +73,7 @@ teams_map = {
         "Baltimore Terrapins": "BLF",
         "Baltimore Monumentals": "BLU",
         "Boston Americans": "BOS",
-        "Boston Red Sox": "BOS",
+        "Boston   Red Sox": "BOS",
         "Boston Red Stockings": "BS1",
         "Boston Beaneaters": "BSN",
         "Boston Bees": "BSN",
@@ -137,6 +140,7 @@ teams_map = {
         "Louisville Grays": "LS1",
         "Louisville Colonels": "LS2",
         "Louisville Eclipse": "LS2",
+        "Miami Marlins": "MIA",
         "Milwaukee Brewers": "MIL",
         "Milwaukee Braves": "ML1",
         "Milwaukee Grays": "ML2",
@@ -163,6 +167,7 @@ teams_map = {
         "Pittsburg Alleghenys": "PIT",
         "Pittsburgh Rebels": "PTF",
         "Pittsburgh Burghers": "PTP",
+        "Pittsburgh Pirates": "PIT",
         "Providence Grays": "PRO",
         "Rockford Forest Citys": "RC1",
         "Rochester Broncos": "RC2",
@@ -180,6 +185,7 @@ teams_map = {
         "Syracuse Stars": "SR1",
         "Tampa Bay Devil Rays": "TBA",
         "Tampa Bay Rays": "TBA",
+        "Texas Rangers": "TEX",
         "Toledo Blue Stockings": "TL1",
         "Toledo Maumees": "TL2",
         "Toronto Blue Jays": "TOR",
@@ -913,7 +919,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-608')
+        response = requests.get('https://www.immaculategrid.com/grid-597')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
@@ -1015,7 +1021,7 @@ def query_baseball_database(grid, schema):
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
 
-            x1y1Answer = players[0]
+            x1y1Answer = players
 
             print(players)
         elif(schema.get('x1') == 'TEXT' and schema.get('y1') == 'TEXT'):
@@ -1031,13 +1037,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y1'))
                 condition = CONDITIONS_MAP.get(grid.get('x1'))
                 players = find_players_with_condition_and_team(team, condition)
-                x1y1Answer = players[0]
+                x1y1Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x1'))
                 condition = CONDITIONS_MAP.get(grid.get('y1'))
                 players = find_players_with_condition_and_team(team, condition)
-                x1y1Answer = players[0]
+                x1y1Answer = players
 
         players = ''
 
@@ -1055,7 +1061,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y2'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x1y2Answer = players[0]
+            x1y2Answer = players
             print(players)
         elif (schema.get('x1') == 'TEXT' and schema.get('y2') == 'TEXT'):
             conditions = [grid.get('x1'), grid.get('y2')]
@@ -1069,13 +1075,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y2'))
                 condition = CONDITIONS_MAP.get(grid.get('x1'))
                 players = find_players_with_condition_and_team(team, condition)
-                x1y2Answer = players[0]
+                x1y2Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x1'))
                 condition = CONDITIONS_MAP.get(grid.get('y2'))
                 players = find_players_with_condition_and_team(team, condition)
-                x1y2Answer = players[0]
+                x1y2Answer = players
 
         players = ''
         # -------------------------------------x1,y3---------------------------------------------
@@ -1092,7 +1098,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y3'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x1y3Answer = players[0]
+            x1y3Answer = players
             print(players)
         elif (schema.get('x1') == 'TEXT' and schema.get('y3') == 'TEXT'):
             conditions = [grid.get('x1'), grid.get('y3')]
@@ -1106,13 +1112,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y3'))
                 condition = CONDITIONS_MAP.get(grid.get('x1'))
                 players = find_players_with_condition_and_team(team, condition)
-                x1y3Answer = players[0]
+                x1y3Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x1'))
                 condition = CONDITIONS_MAP.get(grid.get('y3'))
                 players = find_players_with_condition_and_team(team, condition)
-                x1y3Answer = players[0]
+                x1y3Answer = players
 
         players = ''
         # -------------------------------------x2,y1---------------------------------------------
@@ -1129,7 +1135,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y1'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x2y1Answer = players[0]
+            x2y1Answer = players
             print(players)
         elif (schema.get('x2') == 'TEXT' and schema.get('y1') == 'TEXT'):
             conditions = [grid.get('x2'), grid.get('y1')]
@@ -1143,13 +1149,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y1'))
                 condition = CONDITIONS_MAP.get(grid.get('x2'))
                 players = find_players_with_condition_and_team(team, condition)
-                x2y1Answer = players[0]
+                x2y1Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x2'))
                 condition = CONDITIONS_MAP.get(grid.get('y1'))
                 players = find_players_with_condition_and_team(team, condition)
-                x2y1Answer = players[0]
+                x2y1Answer = players
 
         players = ''
         # -------------------------------------x2,y2---------------------------------------------
@@ -1180,13 +1186,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y2'))
                 condition = CONDITIONS_MAP.get(grid.get('x2'))
                 players = find_players_with_condition_and_team(team, condition)
-                x2y2Answer = players[0]
+                x2y2Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x2'))
                 condition = CONDITIONS_MAP.get(grid.get('y2'))
                 players = find_players_with_condition_and_team(team, condition)
-                x2y2Answer = players[0]
+                x2y2Answer = players
 
         players = ''
         # -------------------------------------x2,y3---------------------------------------------
@@ -1203,7 +1209,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y3'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x2y3Answer = players[0]
+            x2y3Answer = players
             print(players)
         elif (schema.get('x2') == 'TEXT' and schema.get('y3') == 'TEXT'):
             conditions = [grid.get('x2'), grid.get('y3')]
@@ -1217,13 +1223,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y3'))
                 condition = CONDITIONS_MAP.get(grid.get('x2'))
                 players = find_players_with_condition_and_team(team, condition)
-                x2y3Answer = players[0]
+                x2y3Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x2'))
                 condition = CONDITIONS_MAP.get(grid.get('y3'))
                 players = find_players_with_condition_and_team(team, condition)
-                x2y3Answer = players[0]
+                x2y3Answer = players
 
         players = ''
         # -------------------------------------x3,y1---------------------------------------------
@@ -1240,7 +1246,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y1'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x3y1Answer = players[0]
+            x3y1Answer = players
             print(players)
         elif (schema.get('x3') == 'TEXT' and schema.get('y1') == 'TEXT'):
             conditions = [grid.get('x3'), grid.get('y1')]
@@ -1254,13 +1260,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y1'))
                 condition = CONDITIONS_MAP.get(grid.get('x3'))
                 players = find_players_with_condition_and_team(team, condition)
-                x3y1Answer = players[0]
+                x3y1Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x3'))
                 condition = CONDITIONS_MAP.get(grid.get('y1'))
                 players = find_players_with_condition_and_team(team, condition)
-                x3y1Answer = players[0]
+                x3y1Answer = players
 
         players = ''
         # -------------------------------------x3,y2---------------------------------------------
@@ -1277,7 +1283,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y2'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x3y2Answer = players[0]
+            x3y2Answer = players
             print(players)
         elif (schema.get('x3') == 'TEXT' and schema.get('y2') == 'TEXT'):
             conditions = [grid.get('x3'), grid.get('y2')]
@@ -1291,13 +1297,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y2'))
                 condition = CONDITIONS_MAP.get(grid.get('x3'))
                 players = find_players_with_condition_and_team(team, condition)
-                x3y2Answer = players[0]
+                x3y2Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x3'))
                 condition = CONDITIONS_MAP.get(grid.get('y2'))
                 players = find_players_with_condition_and_team(team, condition)
-                x3y2Answer = players[0]
+                x3y2Answer = players
 
         players = ''
         # -------------------------------------x3,y3---------------------------------------------
@@ -1314,7 +1320,7 @@ def query_baseball_database(grid, schema):
             team2 = teams_map.get(grid.get('y3'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
-            x3y3Answer = players[0]
+            x3y3Answer = players
             print(players)
         elif (schema.get('x3') == 'TEXT' and schema.get('y3') == 'TEXT'):
             conditions = [grid.get('x3'), grid.get('y3')]
@@ -1328,13 +1334,13 @@ def query_baseball_database(grid, schema):
                 team = teams_map.get(grid.get('y3'))
                 condition = CONDITIONS_MAP.get(grid.get('x3'))
                 players = find_players_with_condition_and_team(team, condition)
-                x3y3Answer = players[0]
+                x3y3Answer = players
             else:
                 # x1 is a logo
                 team = teams_map.get(grid.get('x3'))
                 condition = CONDITIONS_MAP.get(grid.get('y3'))
                 players = find_players_with_condition_and_team(team, condition)
-                x3y3Answer = players[0]
+                x3y3Answer = players
 
 
         answers = {'x1y1': x1y1Answer, 'x2y1': x2y1Answer, 'x3y1': x3y1Answer,
@@ -1351,9 +1357,6 @@ def query_baseball_database(grid, schema):
 
 def find_players_with_condition_and_team(team_id, condition):
 
-    if condition not in CONDITIONS_MAP:
-        raise ValueError(f"Condition '{condition}' is not supported.")
-
     # SQL query
     query = f"""
     SELECT DISTINCT p.nameFirst, p.nameLast
@@ -1361,11 +1364,17 @@ def find_players_with_condition_and_team(team_id, condition):
     JOIN people p ON b.playerID = p.playerID
     WHERE b.teamID = %s
     GROUP BY b.playerID
-    HAVING {CONDITIONS_MAP[condition]};
+    HAVING {condition};
     """
 
     # Connect to the database (adjust the path to your database file)
-    conn = sqlite3.connect("baseball.db")
+    # Connect to SQLite database
+    conn = pymysql.connect(
+        host=mysql["host"],
+        user=mysql["user"],
+        password=mysql["password"],
+        db=mysql["database"]
+    )
     cursor = conn.cursor()
 
     try:
