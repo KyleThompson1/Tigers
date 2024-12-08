@@ -12,13 +12,13 @@ main = Blueprint('main', __name__)
 
 CONDITIONS_MAP = {
         ".300+\xa0AVG CareerBatting": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING AVG(b.b_H * 1.0 / b.b_AB) >= 0.300)",
-        "300+\xa0AVG SEASON": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING (b.b_H / b.b_AB) >= 0.300)",
+        "300+\xa0AVG SEASON": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING (SUM(b.b_H) / SUM(b.b_AB)) >= 0.300)",
         "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
         "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
         "10+ HR SEASON": "b.b_HR >= 10",
         "10+ WIN SEASON": "p.W >= 10",
         "100+ RBI SEASON": "b.b_RBI >= 100",
-        "100+ RUN SEASON": "b.b_R >= 100",
+        "100+\xa0Run SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearId HAVING SUM(ba.b_R) > 100)",
         "20+ WIN SEASON": "p.W >= 20",
         "200+ Hits SeasonBatting": "SUM(b.b_H) >= 200",
         "200+ K SEASON": "p.SO >= 200",
@@ -39,7 +39,7 @@ CONDITIONS_MAP = {
         "40+ SAVE SEASON": "p.SV >= 40",
         "40+ WAR CAREER": "SUM(b.WAR) >= 40",
         "500+ HR CAREER": "SUM(b.b_HR) >= 500",
-        "All Star": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
+        "All Star": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID AND a.yearID = b.yearID)",
         "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
         "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
         "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'DH' AND f.playerID = b.playerID)",
@@ -51,7 +51,7 @@ CONDITIONS_MAP = {
         "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
         "Played Catchermin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'C' AND f.playerID = b.playerID)",
         "Played Center\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'CF' AND f.playerID = b.playerID)",
-        "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '1B' AND f.playerID = b.playerID)",
+        "Played First\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '1B' AND f.playerID = b.playerID AND b.teamID = f.teamID)",
         "Played Third\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '3B' AND f.playerID = b.playerID)",
         "Rookie of the Year": "(SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID AND a.yearID = b.yearId)",
         "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
@@ -59,7 +59,7 @@ CONDITIONS_MAP = {
         "Played Right\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'RF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "6+ WAR Season": "SUM((((b.b_H + b.b_BB - IFNULL(b.b_CS, 0) + IFNULL(b.b_HBP, 0)) * ((b.b_H - b.b_2B - b.b_3B - b.b_HR) + (2 * b.b_2B) + (3 * b.b_3B) + (4 * b.b_HR) +  (0.26 * (b.b_BB - IFNULL(b.b_IBB, 0) + IFNULL(b.b_HBP, 0))) + (0.52 * (IFNULL(b.b_SH, 0) + IFNULL(b.b_SF, 0) + IFNULL(b.b_SB, 0)))))/ (b.b_AB + b.b_BB + IFNULL(b.b_HBP, 0) + IFNULL(b.b_SH, 0) + IFNULL(b.b_SF, 0)))) / 10 >= 6",
         "Silver Slugger": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Silver Slugger' AND a.playerID = b.playerID)",
-        "Played Shortstopmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'SS' AND f.f_g > 0 AND b.playerID = f.playerID)",
+        "Played Shortstopmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'SS' AND f.f_g > 0 AND f.teamID = b.teamID AND b.playerID = f.playerID)",
         "Played Outfieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE (f.position = 'CF' OR f.position = 'LF' OR f.position = 'RF')  AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "Played Second\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '2B' AND f.playerID = b.playerID)",
         "Born Outside US 50 States and\xa0DC": "EXISTS (SELECT 1 FROM people p2 WHERE p2.playerID = b.playerID AND p2.birthCountry NOT IN ('USA') AND p2.birthCountry IS NOT NULL)"
@@ -922,7 +922,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-607')
+        response = requests.get('https://www.immaculategrid.com/grid-605')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
