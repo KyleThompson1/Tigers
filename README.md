@@ -2,7 +2,7 @@
 
 # 🐯 Fall 2024 Project - Tigers Database
 
-**📅 November 30, 2024**  
+**📅 December 8, 2024**  
 **👥 Team Members:** Jacob Celis, Jan Jasa, Kyle Thompson, Mark Josephs  
 
 ---
