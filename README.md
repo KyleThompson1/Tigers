@@ -57,13 +57,17 @@ Follow these steps to update the Tiger DB with 2023 stats:
 
 Follow these steps to launch the application:  
 
-1. **Activate your virtual environment**.  
-2. Run `run.py` inside the virtual environment:  
+1. **May need to install modules in terminal:**.
+   ```bash
+   pip install pymysql
+   pip install werkzeug
+   pip install flask
+3. Navigate to where run.py is located and run `run.py` inside the terminal:  
    ```bash
    python run.py
-3. Open your web browser and navigate to the hosted application URL:
+4. Click on link `Running on http://127.0.0.1:5000` in terminal or open your web browser and enter the hosted application URL:
    ```bash
-   Running on http://127.0.0.1:5000
+   http://127.0.0.1:5000
 5. To stop the application, press `CTRL + C` in the terminal.  
 
 ---
