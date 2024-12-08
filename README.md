@@ -33,6 +33,26 @@ The admin dashboard enables:
 
 ---
 
+## 🔄 Updating Tiger database with 2023 Lahman stats
+
+Follow these steps to update the Tiger DB with 2023 stats:  
+
+1. **Ensure baseball.sql is included in project**.  
+2. **Create Tiger database in MariaDB**
+   ```bash
+   CREATE DATABASE TIGERS;
+3. **Dump baseball.sql into Tigers database**
+   Navigate to where baseball.sql file is located and enter in terminal:
+   ```bash
+   mysql -u root -p tigers < baseball.sql;
+5. **Run LahmanData.py**
+   Navigate to where LahmanData.py is located and run in terminal:
+   ```bash
+   python LahmanData.py
+6. Tigers database will now include 2023 stats.
+
+---
+
 ## 🚀 Running the Web Application
 
 Follow these steps to launch the application:  
