@@ -62,8 +62,9 @@ Follow these steps to launch the application:
    pip install pymysql
    pip install werkzeug
    pip install flask
-3. Navigate to where run.py is located and run `run.py` inside the terminal:  
+2. Navigate to where run.py is located and run `run.py` inside the terminal:  
    ```bash
+3. Will need to wait 20-30 seconds for Tigers.sql to dump into database.
    python run.py
 4. Click on link `Running on http://127.0.0.1:5000` in terminal or open your web browser and enter the hosted application URL:
    ```bash
