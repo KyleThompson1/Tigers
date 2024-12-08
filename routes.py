@@ -12,7 +12,7 @@ main = Blueprint('main', __name__)
 
 CONDITIONS_MAP = {
         "300+ AVG CAREER": "AVG(b.b_H / b.b_AB) >= 0.300",
-        "300+ AVG SEASON": "b.b_H / b.b_AB >= 0.300",
+        ".300+\xa0AVG SeasonBatting": "SUM(b.b_H) / SUM(b.b_AB) >= 0.300",
         "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
         "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
         "10+ HR SEASON": "b.b_HR >= 10",
@@ -39,20 +39,20 @@ CONDITIONS_MAP = {
         "40+ SAVE SEASON": "p.SV >= 40",
         "40+ WAR CAREER": "SUM(b.WAR) >= 40",
         "500+ HR CAREER": "SUM(b.b_HR) >= 500",
-        "ALL STAR": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
+        "All Star": "EXISTS (SELECT 1 FROM allstarfull a WHERE a.playerID = b.playerID)",
         "BORN OUTSIDE US 50 STATES AND DC": "p.birthCountry NOT IN ('USA')",
         "CY YOUNG": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Cy Young' AND a.playerID = b.playerID)",
         "DESIGNATED HITTER": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'DH' AND f.playerID = b.playerID)",
-        "FIRST ROUND DRAFT PICK": "EXISTS (SELECT 1 FROM draft d WHERE d.round = 1 AND d.playerID = b.playerID)",
+        "First Round Draft Pick": "EXISTS (SELECT 1 FROM collegeplaying cp WHERE cp.playerID = b.playerID AND cp.yearID = YEAR(MAX(p.debutDate)))",
         "GOLD GLOVE": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Gold Glove' AND a.playerID = b.playerID)",
         "Hall of Fame": "EXISTS (SELECT 1 FROM halloffame h WHERE h.playerID = b.playerID AND h.inducted = 'Y')",
         "MVP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Most Valuable Player' AND a.playerID = b.playerID)",
         "ONLY ONE TEAM": "COUNT(DISTINCT b.teamID) = 1",
         "PITCHED": "EXISTS (SELECT 1 FROM pitching p WHERE p.playerID = b.playerID)",
         "Played Catchermin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'C' AND f.playerID = b.playerID)",
-        "PLAYED CENTER FIELD": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = 'CF' AND f.playerID = b.playerID)",
+        "Played Center\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'CF' AND f.playerID = b.playerID)",
         "PLAYED FIRST BASE": "EXISTS (SELECT 1 FROM fielding f WHERE f.POS = '1B' AND f.playerID = b.playerID)",
-        "ROOKIE OF THE YEAR": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
+        "Rookie of the Year": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID)",
         "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
         "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "Played Right\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'RF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
@@ -98,7 +98,7 @@ teams_map = {
         "California Angels": "CAL",
         "Chicago Chi-Feds": "CHF",
         "Chicago Whales": "CHF",
-        "Chicago White Sox": "CHA",
+        "Chicago  White Sox": "CHA",
         "Chicago Colts": "CHN",
         "Chicago Cubs": "CHN",
         "Chicago Orphans": "CHN",
@@ -188,7 +188,7 @@ teams_map = {
         "Texas Rangers": "TEX",
         "Toledo Blue Stockings": "TL1",
         "Toledo Maumees": "TL2",
-        "Toronto Blue Jays": "TOR",
+        "Toronto  Blue Jays": "TOR",
         "Troy Haymakers": "TRO",
         "Troy Trojans": "TRN",
         "Washington Nationals": "WAS",
@@ -919,7 +919,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-597')
+        response = requests.get('https://www.immaculategrid.com/grid-298')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
@@ -1011,12 +1011,13 @@ def query_baseball_database(grid, schema):
                 SELECT p.nameFirst, p.nameLast
                 FROM batting AS b
                 JOIN people AS p ON b.playerID = p.playerID
-                WHERE b.teamID IN (%s, %s)
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = teams_map.get(grid.get('x1'))
-            team2 = teams_map.get(grid.get('y1'))
+            team1 = grid.get('x1')
+            team2 = grid.get('y1')
 
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
@@ -1050,15 +1051,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x1,y2---------------------------------------------
         if (schema.get('x1') == 'LOGO' and schema.get('y2') == 'LOGO'):
             query = """
-                        SELECT p.nameFirst, p.nameLast
-                        FROM batting AS b
-                        JOIN people AS p ON b.playerID = p.playerID
-                        WHERE b.teamID IN (%s, %s)
-                        GROUP BY b.playerID
-                        HAVING COUNT(DISTINCT b.teamID) = 2;
-                    """;
-            team1 = teams_map.get(grid.get('x1'))
-            team2 = teams_map.get(grid.get('y2'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x1')
+            team2 = grid.get('y2')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x1y2Answer = players
@@ -1087,15 +1089,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x1,y3---------------------------------------------
         if (schema.get('x1') == 'LOGO' and schema.get('y3') == 'LOGO'):
             query = """
-                        SELECT p.nameFirst, p.nameLast
-                        FROM batting AS b
-                        JOIN people AS p ON b.playerID = p.playerID
-                        WHERE b.teamID IN (%s, %s)
-                        GROUP BY b.playerID
-                        HAVING COUNT(DISTINCT b.teamID) = 2;
-                    """;
-            team1 = teams_map.get(grid.get('x1'))
-            team2 = teams_map.get(grid.get('y3'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x1')
+            team2 = grid.get('y3')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x1y3Answer = players
@@ -1124,15 +1127,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x2,y1---------------------------------------------
         if (schema.get('x2') == 'LOGO' and schema.get('y1') == 'LOGO'):
             query = """
-                        SELECT p.nameFirst, p.nameLast
-                        FROM batting AS b
-                        JOIN people AS p ON b.playerID = p.playerID
-                        WHERE b.teamID IN (%s, %s)
-                        GROUP BY b.playerID
-                        HAVING COUNT(DISTINCT b.teamID) = 2;
-                    """;
-            team1 = teams_map.get(grid.get('x2'))
-            team2 = teams_map.get(grid.get('y1'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x2')
+            team2 = grid.get('y1')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x2y1Answer = players
@@ -1161,15 +1165,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x2,y2---------------------------------------------
         if (schema.get('x2') == 'LOGO' and schema.get('y2') == 'LOGO'):
             query = """
-                        SELECT p.nameFirst, p.nameLast
-                        FROM batting AS b
-                        JOIN people AS p ON b.playerID = p.playerID
-                        WHERE b.teamID IN (%s, %s)
-                        GROUP BY b.playerID
-                        HAVING COUNT(DISTINCT b.teamID) = 2;
-                    """;
-            team1 = teams_map.get(grid.get('x2'))
-            team2 = teams_map.get(grid.get('y2'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x2')
+            team2 = grid.get('y2')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x2y2Answer = players
@@ -1198,15 +1203,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x2,y3---------------------------------------------
         if (schema.get('x2') == 'LOGO' and schema.get('y3') == 'LOGO'):
             query = """
-                                SELECT p.nameFirst, p.nameLast
-                                FROM batting AS b
-                                JOIN people AS p ON b.playerID = p.playerID
-                                WHERE b.teamID IN (%s, %s)
-                                GROUP BY b.playerID
-                                HAVING COUNT(DISTINCT b.teamID) = 2;
-                            """;
-            team1 = teams_map.get(grid.get('x2'))
-            team2 = teams_map.get(grid.get('y3'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x2')
+            team2 = grid.get('y3')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x2y3Answer = players
@@ -1235,15 +1241,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x3,y1---------------------------------------------
         if (schema.get('x3') == 'LOGO' and schema.get('y1') == 'LOGO'):
             query = """
-                                SELECT p.nameFirst, p.nameLast
-                                FROM batting AS b
-                                JOIN people AS p ON b.playerID = p.playerID
-                                WHERE b.teamID IN (%s, %s)
-                                GROUP BY b.playerID
-                                HAVING COUNT(DISTINCT b.teamID) = 2;
-                            """;
-            team1 = teams_map.get(grid.get('x3'))
-            team2 = teams_map.get(grid.get('y1'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x3')
+            team2 = grid.get('y1')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x3y1Answer = players
@@ -1272,15 +1279,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x3,y2---------------------------------------------
         if (schema.get('x3') == 'LOGO' and schema.get('y2') == 'LOGO'):
             query = """
-                                SELECT p.nameFirst, p.nameLast
-                                FROM batting AS b
-                                JOIN people AS p ON b.playerID = p.playerID
-                                WHERE b.teamID IN (%s, %s)
-                                GROUP BY b.playerID
-                                HAVING COUNT(DISTINCT b.teamID) = 2;
-                            """;
-            team1 = teams_map.get(grid.get('x3'))
-            team2 = teams_map.get(grid.get('y2'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x3')
+            team2 = grid.get('y2')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x3y2Answer = players
@@ -1309,15 +1317,16 @@ def query_baseball_database(grid, schema):
         # -------------------------------------x3,y3---------------------------------------------
         if (schema.get('x3') == 'LOGO' and schema.get('y3') == 'LOGO'):
             query = """
-                                SELECT p.nameFirst, p.nameLast
-                                FROM batting AS b
-                                JOIN people AS p ON b.playerID = p.playerID
-                                WHERE b.teamID IN (%s, %s)
-                                GROUP BY b.playerID
-                                HAVING COUNT(DISTINCT b.teamID) = 2;
-                            """;
-            team1 = teams_map.get(grid.get('x3'))
-            team2 = teams_map.get(grid.get('y3'))
+                SELECT p.nameFirst, p.nameLast
+                FROM batting AS b
+                JOIN people AS p ON b.playerID = p.playerID
+                JOIN teams AS t ON b.teamID = t.teamID
+                WHERE t.team_name IN (%s, %s)
+                GROUP BY b.playerID
+                HAVING COUNT(DISTINCT b.teamID) = 2;
+            """;
+            team1 = grid.get('x3')
+            team2 = grid.get('y3')
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x3y3Answer = players
