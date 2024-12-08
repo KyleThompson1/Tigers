@@ -41,11 +41,11 @@ Follow these steps to update the Tiger DB with 2023 stats:
 2. **Create Tiger database in MariaDB**
    ```bash
    CREATE DATABASE TIGERS;
-3. **Dump baseball.sql into Tigers database**
+3. **Dump baseball.sql into Tigers database**<br>
    Navigate to where baseball.sql file is located and enter in terminal:
    ```bash
    mysql -u root -p tigers < baseball.sql;
-5. **Run LahmanData.py**
+5. **Run LahmanData.py**<br>
    Navigate to where LahmanData.py is located and run in terminal:
    ```bash
    python LahmanData.py
