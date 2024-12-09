@@ -2,7 +2,7 @@
 
 # 🐯 Fall 2024 Project - Tigers Database
 
-**📅 November 30, 2024**  
+**📅 December 8, 2024**  
 **👥 Team Members:** Jacob Celis, Jan Jasa, Kyle Thompson, Mark Josephs  
 
 ---
@@ -33,17 +33,42 @@ The admin dashboard enables:
 
 ---
 
+## 🔄 Updating Tiger database with 2023 Lahman stats
+
+Follow these steps to update the Tiger DB with 2023 stats:  
+
+1. **Ensure baseball.sql is included in project**.  
+2. **Create Tiger database in MariaDB**
+   ```bash
+   CREATE DATABASE TIGERS;
+3. **Dump baseball.sql into Tigers database**<br>
+   Navigate to where baseball.sql file is located and enter in terminal:
+   ```bash
+   mysql -u root -p tigers < baseball.sql;
+5. **Run LahmanData.py**<br>
+   Navigate to where LahmanData.py is located and run in terminal:
+   ```bash
+   python LahmanData.py
+6. Tigers database will now include 2023 stats.
+
+---
+
 ## 🚀 Running the Web Application
 
 Follow these steps to launch the application:  
 
-1. **Activate your virtual environment**.  
-2. Run `run.py` inside the virtual environment:  
+1. **May need to install modules in terminal:**.
+   ```bash
+   pip install pymysql
+   pip install werkzeug
+   pip install flask
+2. Navigate to where run.py is located and run `run.py` inside the terminal:  
    ```bash
    python run.py
-3. Open your web browser and navigate to the hosted application URL:
+3. Will need to wait 20-30 seconds for Tigers.sql to dump into database.
+4. Click on link `Running on http://127.0.0.1:5000` in terminal or open your web browser and enter the hosted application URL:
    ```bash
-   Running on http://127.0.0.1:5000
+   http://127.0.0.1:5000
 5. To stop the application, press `CTRL + C` in the terminal.  
 
 ---
