@@ -12,7 +12,7 @@ main = Blueprint('main', __name__)
 
 CONDITIONS_MAP = {
         ".300+\xa0AVG CareerBatting": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING AVG(b.b_H * 1.0 / b.b_AB) >= 0.300)",
-        "300+\xa0AVG SEASON": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING (SUM(b.b_H) / SUM(b.b_AB)) >= 0.300)",
+        ".300+\xa0AVG SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = t.teamID AND ba.b_AB > 0 GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_H) / SUM(ba.b_AB) >= 0.300)",
         "≤\xa03.00\xa0ERA Season": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID AND pit.p_ERA <= 3.00 GROUP BY pit.playerID, pit.yearID)",
         "10+ HR SEASON": "b.b_HR >= 10",
         "10+ WIN SEASON": "p.W >= 10",
@@ -25,7 +25,7 @@ CONDITIONS_MAP = {
         "2000+ K CAREER": "SUM(p.SO) >= 2000",
         "2000+\xa0Hits CareerBatting": "b.playerID IN (SELECT b.playerID FROM batting b GROUP BY b.playerID HAVING SUM(b.b_H) >= 2000)",
         "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
-        "30+ HR Season": "b.b_HR >= 30",
+        "30+ HR SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_HR) >= 30)",
         "30+ SB Season": "SUM(b.b_SB) >= 30",
         "30+ SAVE Season": "p.SV >= 30",
         "300+ HR CareerBatting": "SUM(b.b_HR) >= 300",
