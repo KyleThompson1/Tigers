@@ -1438,10 +1438,7 @@ def solve_grid():
             'error': 'GridLink is required',
             'status': 'failed'
         }), 400
-
     immaculateGridLink = data.get('GridLink')
-
-    # Process the grid link
     grid_info = scrape_immaculate_grid(immaculateGridLink)
     if not grid_info:
         return jsonify({
