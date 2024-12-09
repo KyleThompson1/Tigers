@@ -28,7 +28,7 @@ CONDITIONS_MAP = {
         "30+ HR SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_HR) >= 30)",
         "30+ SB Season": "SUM(b.b_SB) >= 30",
         "30+ SAVE Season": "p.SV >= 30",
-        "300+ HR CareerBatting": "SUM(b.b_HR) >= 300",
+        "300+ HR CareerBatting": "b.playerID IN (SELECT ba.playerID FROM batting ba GROUP BY ba.playerID HAVING SUM(ba.b_HR) >= 300)",
         "300+ SAVE CAREER": "SUM(p.SV) >= 300",
         "300+ WINS CAREER": "SUM(p.W) >= 300",
         "3000+ K CAREER": "SUM(p.SO) >= 3000",
