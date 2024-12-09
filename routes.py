@@ -13,18 +13,17 @@ main = Blueprint('main', __name__)
 CONDITIONS_MAP = {
         ".300+\xa0AVG CareerBatting": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING AVG(b.b_H * 1.0 / b.b_AB) >= 0.300)",
         "300+\xa0AVG SEASON": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING (SUM(b.b_H) / SUM(b.b_AB)) >= 0.300)",
-        "≤ 3.00 ERA CAREER": "AVG(p.ERA) <= 3.00",
-        "≤ 3.00 ERA SEASON": "p.ERA <= 3.00",
+        "≤\xa03.00\xa0ERA Season": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID AND pit.p_ERA <= 3.00 GROUP BY pit.playerID, pit.yearID)",
         "10+ HR SEASON": "b.b_HR >= 10",
         "10+ WIN SEASON": "p.W >= 10",
-        "100+ RBI SEASON": "b.b_RBI >= 100",
+        "100+\xa0RBI SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_RBI) >= 100)",
         "100+\xa0Run SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearId HAVING SUM(ba.b_R) > 100)",
         "20+ WIN SEASON": "p.W >= 20",
         "200+ Hits SeasonBatting": "SUM(b.b_H) >= 200",
         "200+ K SEASON": "p.SO >= 200",
         "200+\xa0Wins CareerPitching": "b.playerID IN (SELECT pit.playerID FROM pitching pit GROUP BY pit.playerID HAVING SUM(pit.p_W) >= 200)",
         "2000+ K CAREER": "SUM(p.SO) >= 2000",
-        "2000+\xa0Hits CareerBatting": "SUM(b.b_H) >= 2000",
+        "2000+\xa0Hits CareerBatting": "b.playerID IN (SELECT b.playerID FROM batting b GROUP BY b.playerID HAVING SUM(b.b_H) >= 2000)",
         "30+ HR / 30+ SB SEASON": "b.b_HR >= 30 AND b.b_SB >= 30",
         "30+ HR Season": "b.b_HR >= 30",
         "30+ SB Season": "SUM(b.b_SB) >= 30",
@@ -62,7 +61,8 @@ CONDITIONS_MAP = {
         "Played Shortstopmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'SS' AND f.f_g > 0 AND f.teamID = b.teamID AND b.playerID = f.playerID)",
         "Played Outfieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE (f.position = 'CF' OR f.position = 'LF' OR f.position = 'RF')  AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "Played Second\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '2B' AND f.playerID = b.playerID)",
-        "Born Outside US 50 States and\xa0DC": "EXISTS (SELECT 1 FROM people p2 WHERE p2.playerID = b.playerID AND p2.birthCountry NOT IN ('USA') AND p2.birthCountry IS NOT NULL)"
+        "Born Outside US 50 States and\xa0DC": "EXISTS (SELECT 1 FROM people p2 WHERE p2.playerID = b.playerID AND p2.birthCountry NOT IN ('USA') AND p2.birthCountry IS NOT NULL)",
+        "Threw a No‑Hitter": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID AND pit.p_H = 0  AND pit.p_IPOuts >= 27 AND pit.p_ER = 0 )",
     }
 
 teams_map = {
@@ -922,7 +922,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-605')
+        response = requests.get('https://www.immaculategrid.com/grid-458')
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
@@ -975,6 +975,9 @@ def scrape_immaculate_grid():
         print(f"Error scraping Immaculate Grid: {e}")
         return None
 
+def remove_double_spaces(input_string):
+    # Replace consecutive spaces with a single space
+    return ' '.join(input_string.split())
 
 def query_baseball_database(grid, schema):
     """
@@ -1019,8 +1022,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x1')
-            team2 = grid.get('y1')
+            team1 = remove_double_spaces(grid.get('x1'))
+            team2 = remove_double_spaces(grid.get('y1'))
 
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
@@ -1038,13 +1041,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x1') == 'TEXT':
                 # y1 is logo
-                team = teams_map.get(grid.get('y1'))
+                team = remove_double_spaces(grid.get('y1'))
                 condition = CONDITIONS_MAP.get(grid.get('x1'))
                 players = find_players_with_condition_and_team(team, condition)
                 x1y1Answer = players
             else:
                 # x1 is a logo
-                team = teams_map.get(grid.get('x1'))
+                team = remove_double_spaces(grid.get('x1'))
                 condition = CONDITIONS_MAP.get(grid.get('y1'))
                 players = find_players_with_condition_and_team(team, condition)
                 x1y1Answer = players
@@ -1062,8 +1065,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x1')
-            team2 = grid.get('y2')
+            team1 = remove_double_spaces(grid.get('x1'))
+            team2 = remove_double_spaces(grid.get('y2'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x1y2Answer = players
@@ -1077,13 +1080,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x1') == 'TEXT':
                 # y1 is logo
-                team = teams_map.get(grid.get('y2'))
+                team = remove_double_spaces(grid.get('y2'))
                 condition = CONDITIONS_MAP.get(grid.get('x1'))
                 players = find_players_with_condition_and_team(team, condition)
                 x1y2Answer = players
             else:
                 # x1 is a logo
-                team = teams_map.get(grid.get('x1'))
+                team = remove_double_spaces(grid.get('x1'))
                 condition = CONDITIONS_MAP.get(grid.get('y2'))
                 players = find_players_with_condition_and_team(team, condition)
                 x1y2Answer = players
@@ -1100,8 +1103,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x1')
-            team2 = grid.get('y3')
+            team1 = remove_double_spaces(grid.get('x1'))
+            team2 = remove_double_spaces(grid.get('y3'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x1y3Answer = players
@@ -1115,14 +1118,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x1') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y3')
+                team = remove_double_spaces(grid.get('y3'))
                 condition = CONDITIONS_MAP.get(grid.get('x1'))
                 players = find_players_with_condition_and_team(team, condition)
                 x1y3Answer = players
             else:
                 # x1 is a logo
-                team = teams_map.get(grid.get('x1'))
-                team_name = grid.get('x1')
+                team_name = remove_double_spaces(grid.get('x1'))
                 condition = CONDITIONS_MAP.get(grid.get('y3'))
                 players = find_players_with_condition_and_team(team_name, condition)
                 x1y3Answer = players
@@ -1139,8 +1141,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x2')
-            team2 = grid.get('y1')
+            team1 = remove_double_spaces(grid.get('x2'))
+            team2 = remove_double_spaces(grid.get('y1'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x2y1Answer = players
@@ -1154,13 +1156,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x2') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y1')
+                team = remove_double_spaces(grid.get('y1'))
                 condition = CONDITIONS_MAP.get(grid.get('x2'))
                 players = find_players_with_condition_and_team(team, condition)
                 x2y1Answer = players
             else:
                 # x1 is a logo
-                team = grid.get('x2')
+                team = remove_double_spaces(grid.get('x2'))
                 condition = CONDITIONS_MAP.get(grid.get('y1'))
                 players = find_players_with_condition_and_team(team, condition)
                 x2y1Answer = players
@@ -1177,8 +1179,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x2')
-            team2 = grid.get('y2')
+            team1 = remove_double_spaces(grid.get('x2'))
+            team2 = remove_double_spaces(grid.get('y2'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x2y2Answer = players
@@ -1192,13 +1194,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x2') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y2')
+                team = remove_double_spaces(grid.get('y2'))
                 condition = CONDITIONS_MAP.get(grid.get('x2'))
                 players = find_players_with_condition_and_team(team, condition)
                 x2y2Answer = players
             else:
                 # x1 is a logo
-                team = grid.get('x2')
+                team = remove_double_spaces(grid.get('x2'))
                 condition = CONDITIONS_MAP.get(grid.get('y2'))
                 players = find_players_with_condition_and_team(team, condition)
                 x2y2Answer = players
@@ -1215,8 +1217,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x2')
-            team2 = grid.get('y3')
+            team1 = remove_double_spaces(grid.get('x2'))
+            team2 = remove_double_spaces(grid.get('y3'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x2y3Answer = players
@@ -1230,13 +1232,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x2') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y3')
+                team = remove_double_spaces(grid.get('y3'))
                 condition = CONDITIONS_MAP.get(grid.get('x2'))
                 players = find_players_with_condition_and_team(team, condition)
                 x2y3Answer = players
             else:
                 # x1 is a logo
-                team = grid.get('x2')
+                team = remove_double_spaces(grid.get('x2'))
                 condition = CONDITIONS_MAP.get(grid.get('y3'))
                 players = find_players_with_condition_and_team(team, condition)
                 x2y3Answer = players
@@ -1253,8 +1255,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x3')
-            team2 = grid.get('y1')
+            team1 = remove_double_spaces(grid.get('x3'))
+            team2 = remove_double_spaces(grid.get('y1'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x3y1Answer = players
@@ -1268,13 +1270,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x3') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y1')
+                team = remove_double_spaces(grid.get('y1'))
                 condition = CONDITIONS_MAP.get(grid.get('x3'))
                 players = find_players_with_condition_and_team(team, condition)
                 x3y1Answer = players
             else:
                 # x1 is a logo
-                team = grid.get('x3')
+                team = remove_double_spaces(grid.get('x3'))
                 condition = CONDITIONS_MAP.get(grid.get('y1'))
                 players = find_players_with_condition_and_team(team, condition)
                 x3y1Answer = players
@@ -1291,8 +1293,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x3')
-            team2 = grid.get('y2')
+            team1 = remove_double_spaces(grid.get('x3'))
+            team2 = remove_double_spaces(grid.get('y2'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x3y2Answer = players
@@ -1306,13 +1308,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x3') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y2')
+                team = remove_double_spaces(grid.get('y2'))
                 condition = CONDITIONS_MAP.get(grid.get('x3'))
                 players = find_players_with_condition_and_team(team, condition)
                 x3y2Answer = players
             else:
                 # x1 is a logo
-                team = grid.get('x3')
+                team = remove_double_spaces(grid.get('x3'))
                 condition = CONDITIONS_MAP.get(grid.get('y2'))
                 players = find_players_with_condition_and_team(team, condition)
                 x3y2Answer = players
@@ -1329,8 +1331,8 @@ def query_baseball_database(grid, schema):
                 GROUP BY b.playerID
                 HAVING COUNT(DISTINCT b.teamID) = 2;
             """;
-            team1 = grid.get('x3')
-            team2 = grid.get('y3')
+            team1 = remove_double_spaces(grid.get('x3'))
+            team2 = remove_double_spaces(grid.get('y3'))
             cursor.execute(query, (team1, team2))
             players = cursor.fetchall()
             x3y3Answer = players
@@ -1344,13 +1346,13 @@ def query_baseball_database(grid, schema):
         else:
             if schema.get('x3') == 'TEXT':
                 # y1 is logo
-                team = grid.get('y3')
+                team = remove_double_spaces(grid.get('y3'))
                 condition = CONDITIONS_MAP.get(grid.get('x3'))
                 players = find_players_with_condition_and_team(team, condition)
                 x3y3Answer = players
             else:
                 # x1 is a logo
-                team = grid.get('x3')
+                team = remove_double_spaces(grid.get('x3'))
                 condition = CONDITIONS_MAP.get(grid.get('y3'))
                 players = find_players_with_condition_and_team(team, condition)
                 x3y3Answer = players
