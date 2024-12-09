@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Immaculate Grid Solver</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Immaculate Grid Solver</h1>
+    <label for="grid-link">Enter Grid Link:</label>
+    <input type="text" id="grid-link" placeholder="Paste the grid link here">
+    <button id="solve-grid">Solve Grid</button>
+    <div id="results"></div>
+    <script>
+        $('#solve-grid').click(function() {
+            const gridLink = $('#grid-link').val();
+            if (!gridLink) {
+                alert('Please enter a valid grid link.');
+                return;
+            }
+
+
+            $.ajax({
+                url: '/solve-grid',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ GridLink: gridLink }),
+                success: function(response) {
+                    let resultsHtml = '<h2>Grid Categories:</h2>';
+                    console.log(response);
+                    resultsHtml += `<p>x1: ${response.grid_categories.grid_categories.x1}</p>`;
+                    resultsHtml += `<p>x2: ${response.grid_categories.grid_categories.x2}</p>`;
+                    resultsHtml += `<p>x3: ${response.grid_categories.grid_categories.x3}</p>`;
+                    resultsHtml += `<p>y1: ${response.grid_categories.grid_categories.y1}</p>`;
+                    resultsHtml += `<p>y2: ${response.grid_categories.grid_categories.y2}</p>`;
+                    resultsHtml += `<p>y3: ${response.grid_categories.grid_categories.y3}</p>`;
+
+                    resultsHtml += '<h2>Matching Players:</h2>';
+                    if (typeof response.matching_players === 'object') {
+                         Object.entries(response.matching_players).forEach(([firstName, lastName], index) => {
+                             const fullName = `${firstName} ${lastName}`.replace(',', '');
+                             resultsHtml += `<p>${fullName}</p>`;
+                         });
+                    } else {
+                        resultsHtml += `<p>Unknown data format</p>`;
+                    }
+
+                    $('#results').html(resultsHtml);
+                },
+                error: function(xhr) {
+                    $('#results').html(`<p>Error: ${xhr.responseJSON.error}</p>`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
