@@ -914,7 +914,7 @@ def player_profile():
         return redirect(url_for('main'))
 
 
-def scrape_immaculate_grid():
+def scrape_immaculate_grid(immaculateGridLink):
     """
     Scrape the Immaculate Grid website to extract grid fields.
     Note: You'll need to replace this with the actual scraping logic
@@ -922,7 +922,7 @@ def scrape_immaculate_grid():
     """
     try:
         # Example scraping (you'll need to adjust based on actual website)
-        response = requests.get('https://www.immaculategrid.com/grid-458')
+        response = requests.get(immaculateGridLink)
         soup = BeautifulSoup(response.text, 'html.parser')
 
         x_axis = soup.find_all(class_=['flex items-center justify-center w-24 sm:w-36 md:w-48 h-16 sm:h-24 md:h-36'])
@@ -1432,9 +1432,17 @@ def solve_grid():
     """
     Endpoint to solve the Immaculate Grid
     """
-    # Scrape the current grid
-    grid_info = scrape_immaculate_grid()
+    data = request.get_json()
+    if not data or 'GridLink' not in data:
+        return jsonify({
+            'error': 'GridLink is required',
+            'status': 'failed'
+        }), 400
 
+    immaculateGridLink = data.get('GridLink')
+
+    # Process the grid link
+    grid_info = scrape_immaculate_grid(immaculateGridLink)
     if not grid_info:
         return jsonify({
             'error': 'Could not retrieve grid information',
