@@ -57,7 +57,7 @@ Follow these steps to update the Tiger DB with 2023 stats:
 
 Follow these steps to launch the application:  
 
-Before running project!<br>
+**Before running project!**<br>
 Extract Tigers.sql from zip folder and include into the project
 Web application will not run properly unless this is done.
 
