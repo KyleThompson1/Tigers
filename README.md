@@ -57,6 +57,10 @@ Follow these steps to update the Tiger DB with 2023 stats:
 
 Follow these steps to launch the application:  
 
+Before running project!
+Extract Tigers.sql from zip folder and include into the project
+Web application will not run properly unless this is done.
+
 1. **May need to install modules in terminal:**.
    ```bash
    pip install pymysql
