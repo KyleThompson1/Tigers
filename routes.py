@@ -12,17 +12,17 @@ main = Blueprint('main', __name__)
 
 CONDITIONS_MAP = {
         ".300+\xa0AVG CareerBatting": "b.playerID IN (SELECT playerid FROM batting b WHERE b.b_AB > 0 GROUP BY b.playerID HAVING AVG(b.b_H * 1.0 / b.b_AB) >= 0.300)",
-        ".300+\xa0AVG SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = t.teamID AND ba.b_AB > 0 GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_H) / SUM(ba.b_AB) >= 0.300)",
-        "≤\xa03.00\xa0ERA Season": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID AND pit.p_ERA <= 3.00 GROUP BY pit.playerID, pit.yearID)",
-        "10+ HR SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = t.teamID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_HR) > 10)",
-        "100+\xa0RBI SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = t.teamID AND ba.b_AB > 0 GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_RBI) > 100)",
-        "100+\xa0Run SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearId HAVING SUM(ba.b_R) > 100)",
+        ".300+\xa0AVG SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = b.teamID AND ba.b_AB > 0 GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_H) / SUM(ba.b_AB) >= 0.300)",
+        "≤\xa03.00\xa0ERA Season": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = b.teamID AND pit.p_ERA <= 3.00 GROUP BY pit.playerID, pit.yearID)",
+        "10+ HR SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = b.teamID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_HR) > 10)",
+        "100+\xa0RBI SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = b.teamID AND ba.b_AB > 0 GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_RBI) > 100)",
+        "100+\xa0Run SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = b.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearId HAVING SUM(ba.b_R) > 100)",
         "20+ Win SeasonPitching": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.p_W >= 20 AND pit.yearID = b.yearID)",
-        "200+ Hits SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = t.teamID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_H) >= 200)",
-        "200+ K SeasonPitching": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID GROUP BY pit.playerID, pit.yearID HAVING SUM(pit.p_SO) >= 200)",
+        "200+ Hits SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID AND ba.teamID = b.teamID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_H) >= 200)",
+        "200+ K SeasonPitching": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = b.teamID GROUP BY pit.playerID, pit.yearID HAVING SUM(pit.p_SO) >= 200)",
         "200+\xa0Wins CareerPitching": "b.playerID IN (SELECT pit.playerID FROM pitching pit GROUP BY pit.playerID HAVING SUM(pit.p_W) >= 200)",
         "2000+\xa0Hits CareerBatting": "b.playerID IN (SELECT b.playerID FROM batting b GROUP BY b.playerID HAVING SUM(b.b_H) >= 2000)",
-        "30+ HR SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = t.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_HR) >= 30)",
+        "30+ HR SeasonBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.teamID = b.teamID AND ba.playerID = b.playerID GROUP BY ba.playerID, ba.yearID HAVING SUM(ba.b_HR) >= 30)",
         "300+ HR CareerBatting": "b.playerID IN (SELECT ba.playerID FROM batting ba GROUP BY ba.playerID HAVING SUM(ba.b_HR) >= 300)",
         "300+\xa0Wins CareerPitching": "b.playerID IN (SELECT pit.playerID FROM pitching pit GROUP BY pit.playerID HAVING SUM(pit.p_W) >= 300)",
         "3000+\xa0Hits CareerBatting": "EXISTS (SELECT 1 FROM batting ba WHERE ba.playerID = b.playerID GROUP BY ba.playerID HAVING SUM(ba.b_H) >= 3000)",
@@ -42,7 +42,7 @@ CONDITIONS_MAP = {
         "Played Catchermin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'C' AND f.playerID = b.playerID)",
         "Played Center\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'CF' AND f.playerID = b.playerID)",
         "Played First\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '1B' AND f.playerID = b.playerID AND b.teamID = f.teamID)",
-        "Played Third\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '3B' AND f.teamID = t.teamID AND f.playerID = b.playerID)",
+        "Played Third\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '3B' AND f.teamID = b.teamID AND f.playerID = b.playerID)",
         "Rookie of the Year": "(SELECT 1 FROM awards a WHERE a.awardID = 'Rookie of the Year' AND a.playerID = b.playerID AND a.yearID = b.yearId)",
         "WORLD SERIES CHAMP": "EXISTS (SELECT 1 FROM awards a WHERE a.awardID = 'World Series' AND a.playerID = b.playerID)",
         "Played Left\xa0Fieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = 'LF' AND f.f_G >= 1 AND f.playerID = b.playerID)",
@@ -53,8 +53,9 @@ CONDITIONS_MAP = {
         "Played Outfieldmin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE (f.position = 'CF' OR f.position = 'LF' OR f.position = 'RF')  AND f.f_G >= 1 AND f.playerID = b.playerID)",
         "Played Second\xa0Basemin. 1 game": "EXISTS (SELECT 1 FROM fielding f WHERE f.position = '2B' AND f.playerID = b.playerID)",
         "Born Outside US 50 States and\xa0DC": "EXISTS (SELECT 1 FROM people p2 WHERE p2.playerID = b.playerID AND p2.birthCountry NOT IN ('USA') AND p2.birthCountry IS NOT NULL)",
-        "Threw a No‑Hitter": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID AND pit.p_H = 0  AND pit.p_IPOuts >= 27 AND pit.p_ER = 0 )",
-        "10+ Win SeasonPitching": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = t.teamID GROUP BY pit.playerID, pit.yearID HAVING SUM(pit.p_W) >= 10)",
+        "Threw a No‑Hitter": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = b.teamID AND pit.p_H = 0  AND pit.p_IPOuts >= 27 AND pit.p_ER = 0 )",
+        "10+ Win SeasonPitching": "EXISTS (SELECT 1 FROM pitching pit WHERE pit.playerID = b.playerID AND pit.teamID = b.teamID GROUP BY pit.playerID, pit.yearID HAVING SUM(pit.p_W) >= 10)",
+        "Played In Major Negro\xa0Lgs": "(SELECT 1 from people LIMIT 1)"
     }
 
 teams_map = {
