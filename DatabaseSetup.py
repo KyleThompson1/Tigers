@@ -67,6 +67,29 @@ def initialize_database():
     # Execute SQL code to create the roster_requests table
     cursor.execute(create_roster_requests_table_sql)
 
+    # --------------------- Added for dumping the Tigers.sql into Tigers ---------------------
+    try:
+        with open('../Tigers2023Data/Tigers.sql', 'r', encoding='utf-16') as sql_file:
+            sql_script = sql_file.read()
+
+        # Split the script into individual SQL statements
+        sql_statements = sql_script.split(';')
+
+        for statement in sql_statements:
+            statement = statement.strip()
+            if statement:  # Skip empty statements
+                try:
+                    cursor.execute(statement)
+                    print(f"Executed: {statement[:50]}...")
+                except Exception as e:
+                    print(f"Skipped problematic statement due to error: {e}")
+                    print(f"Problematic Statement: {statement[:50]}...")
+
+        print("Tigers.sql loaded successfully (skipped problematic statements).")
+    except Exception as e:
+        print(f"Error reading Tigers.sql: {e}")
+    # ----------------------------------------------------------------------------------------
+
     # Hash the admin password using Scrypt (to maintain consistency with other users)
     admin_password = "adminpass"
     hashed_password = generate_password_hash(admin_password, method='scrypt')
