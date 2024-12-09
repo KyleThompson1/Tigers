@@ -36,10 +36,23 @@
 
                     resultsHtml += '<h2>Matching Players:</h2>';
                     if (typeof response.matching_players === 'object') {
-                         Object.entries(response.matching_players).forEach(([firstName, lastName], index) => {
-                             const fullName = `${firstName} ${lastName}`.replace(',', '');
-                             resultsHtml += `<p>${fullName}</p>`;
-                         });
+                         Object.entries(response.matching_players).forEach(([key, value]) => {
+                            resultsHtml += `<h1>${key}</h1>`;
+                            if (Array.isArray(value)) {
+                                value.forEach((player, i) => {
+                                    if (Array.isArray(player) && player.length > 0) {
+                                        const firstName = player[0];
+                                        const lastName = player[1];
+                                        const fullName = `${firstName} ${lastName}`;
+                                        resultsHtml += `<p>${fullName}</p>`;
+                                    } else {
+                                        resultsHtml += `<p>Invalid player data for index: ${i}</p>`;
+                                    }
+                                });
+                            } else {
+                                resultsHtml += `<p>Invalid data for key: ${key}</p>`;
+                            }
+                        });
                     } else {
                         resultsHtml += `<p>Unknown data format</p>`;
                     }
